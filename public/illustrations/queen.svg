@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "queen". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M60 120c-10 40 0 80 20 96h80c20-16 30-56 20-96z" fill="#8D5A3B"/>
+<circle cx="120" cy="124" r="56" fill="#FFD8B5"/>
+<path d="M64 112c10-30 40-40 56-40s46 10 56 40c-30-10-80-10-112 0z" fill="#8D5A3B"/>
+<path d="M70 72l14-44 22 26 14-36 14 36 22-26 14 44z" fill="#FFD43B"/>
+<g stroke="none"><circle cx="120" cy="58" r="7" fill="#FF5A5F"/><circle cx="92" cy="64" r="5" fill="#4DABF7"/><circle cx="148" cy="64" r="5" fill="#40C057"/></g>
+<circle cx="100" cy="126" r="7" fill="#2B2240" stroke="none"/><circle cx="102.5" cy="123.5" r="2.4" fill="#fff" stroke="none"/><circle cx="140" cy="126" r="7" fill="#2B2240" stroke="none"/><circle cx="142.5" cy="123.5" r="2.4" fill="#fff" stroke="none"/><ellipse cx="88" cy="146" rx="10" ry="6" fill="#FF9BB3" opacity=".7" stroke="none"/><ellipse cx="152" cy="146" rx="10" ry="6" fill="#FF9BB3" opacity=".7" stroke="none"/>
+<path d="M108 152 q12 10.8 24 0" fill="none"/>
+</g>
+</svg>

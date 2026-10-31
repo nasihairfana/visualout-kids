@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "kite". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M150 150q-20 30 0 40t-10 40" fill="none" stroke-width="4"/>
+<path d="M140 176l-12-8 2 16zM140 176l14-4-6 14z" fill="#FF6B6B"/>
+<path d="M148 206l-12-6 4 14zM148 206l14-2-6 12z" fill="#4DABF7"/>
+<path d="M120 20 192 92 150 150 60 98z" fill="#FFD43B"/>
+<path d="M120 20 150 150M192 92 60 98" fill="none" stroke-width="4"/>
+<path d="M120 20l-60 78 46-2z" fill="#FF8787"/>
+<path d="M150 150l42-58-46 3z" fill="#74C0FC"/>
+</g>
+</svg>

@@ -1,0 +1,14 @@
+<!-- PLACEHOLDER illustration for "zebra". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M78 60l-10-40 34 30M162 60l10-40-34 30" fill="#F8F9FA"/>
+<path d="M88 40c10-18 54-18 64 0l-8 30h-48z" fill="#2B2240"/>
+<path d="M74 92c0-36 20-54 46-54s46 18 46 54c0 30-6 52-10 66H84c-4-14-10-36-10-66z" fill="#F8F9FA"/>
+<g fill="#2B2240" stroke="none">
+<path d="M74 92q24 4 30 14-20 0-30-6zM166 92q-24 4-30 14 20 0 30-6zM78 122q20 4 26 14-18-2-26-8zM162 122q-20 4-26 14 18-2 26-8zM100 50q20 10 40 0l-4 14q-16 6-32 0z"/></g>
+<ellipse cx="120" cy="174" rx="44" ry="36" fill="#CED4DA"/>
+<circle cx="98" cy="104" r="8" fill="#2B2240" stroke="none"/><circle cx="100.5" cy="101.5" r="2.8" fill="#fff" stroke="none"/><circle cx="142" cy="104" r="8" fill="#2B2240" stroke="none"/><circle cx="144.5" cy="101.5" r="2.8" fill="#fff" stroke="none"/>
+<ellipse cx="104" cy="170" rx="6" ry="8" fill="#2B2240" stroke="none"/><ellipse cx="136" cy="170" rx="6" ry="8" fill="#2B2240" stroke="none"/>
+<path d="M108 190 q12 10.8 24 0" fill="none"/>
+</g>
+</svg>

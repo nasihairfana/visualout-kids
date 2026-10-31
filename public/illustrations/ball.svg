@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "ball". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="120" cy="124" r="86" fill="#fff"/>
+<path d="M120 38a86 86 0 0 1 0 172 50 86 0 0 1 0-172z" fill="#4DABF7" stroke="none"/>
+<path d="M120 38a50 86 0 0 1 0 172 50 86 0 0 1 0-172z" fill="#FFD43B" stroke="none"/>
+<path d="M120 38a86 86 0 0 0 0 172 50 86 0 0 0 0-172z" fill="#FF6B6B" stroke="none"/>
+<path d="M120 38a20 86 0 0 1 0 172 20 86 0 0 1 0-172z" fill="#fff" stroke="none"/>
+<circle cx="120" cy="124" r="86" fill="none"/>
+<ellipse cx="86" cy="80" rx="14" ry="8" fill="#fff" opacity=".7" stroke="none" transform="rotate(-35 86 80)"/>
+</g>
+</svg>

@@ -1,0 +1,17 @@
+<!-- PLACEHOLDER illustration for X / Xylophone. Replace with original Visualout Kids artwork. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <g transform="rotate(-8 120 120)">
+    <rect x="30" y="70" width="180" height="12" rx="6" fill="#8A5A2B"/>
+    <rect x="30" y="160" width="180" height="12" rx="6" fill="#8A5A2B"/>
+    <rect x="38" y="52" width="26" height="140" rx="10" fill="#FF6B6B"/>
+    <rect x="72" y="60" width="26" height="124" rx="10" fill="#FFA94D"/>
+    <rect x="106" y="68" width="26" height="108" rx="10" fill="#FFD43B"/>
+    <rect x="140" y="76" width="26" height="92" rx="10" fill="#69DB7C"/>
+    <rect x="174" y="84" width="26" height="76" rx="10" fill="#4DABF7"/>
+    <g fill="#fff" opacity="0.8"><circle cx="51" cy="76" r="4"/><circle cx="85" cy="76" r="4"/><circle cx="119" cy="78" r="4"/><circle cx="153" cy="80" r="4"/><circle cx="187" cy="92" r="4"/></g>
+  </g>
+  <line x1="60" y1="222" x2="128" y2="150" stroke="#8A5A2B" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="132" cy="146" r="14" fill="#E64980"/>
+  <line x1="190" y1="226" x2="170" y2="160" stroke="#8A5A2B" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="168" cy="154" r="14" fill="#7950F2"/>
+</svg>

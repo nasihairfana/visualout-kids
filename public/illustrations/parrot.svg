@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "parrot". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M110 176l-20 50h20l14-44M134 176l6 50h18l-8-50" fill="#4DABF7"/>
+<ellipse cx="120" cy="128" rx="56" ry="70" fill="#40C057"/>
+<path d="M120 40c40 0 62 30 56 66-30 10-88 6-108-10 0-34 20-56 52-56z" fill="#FF5A5F"/>
+<path d="M100 120c-30 10-40 50-22 74 22-6 40-40 22-74z" fill="#2F9E44"/>
+<path d="M150 74c26 0 34 22 24 40-6-10-16-14-26-12z" fill="#FFD43B"/>
+<circle cx="130" cy="72" r="8" fill="#2B2240" stroke="none"/><circle cx="132.5" cy="69.5" r="2.8" fill="#fff" stroke="none"/>
+<ellipse cx="120" cy="150" rx="22" ry="30" fill="#8CE99A" stroke="none" opacity=".7"/>
+</g>
+</svg>

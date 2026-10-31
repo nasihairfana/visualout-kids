@@ -1,0 +1,13 @@
+<!-- PLACEHOLDER illustration for "dog". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="120" cy="128" rx="72" ry="70" fill="#E0B07A"/>
+<path d="M58 80c-30 0-40 50-24 86 10 6 22-4 26-20 6-24 6-50-2-66zM182 80c30 0 40 50 24 86-10 6-22-4-26-20-6-24-6-50 2-66z" fill="#8D5A3B"/>
+<ellipse cx="120" cy="160" rx="38" ry="28" fill="#F7E1C4" stroke="none"/>
+<ellipse cx="148" cy="104" rx="20" ry="18" fill="#8D5A3B" stroke="none" opacity=".6"/>
+<circle cx="96" cy="118" r="9" fill="#2B2240" stroke="none"/><circle cx="98.5" cy="115.5" r="3.1" fill="#fff" stroke="none"/><circle cx="146" cy="118" r="9" fill="#2B2240" stroke="none"/><circle cx="148.5" cy="115.5" r="3.1" fill="#fff" stroke="none"/>
+<ellipse cx="120" cy="146" rx="14" ry="10" fill="#2B2240"/>
+<path d="M120 156v10q-10 12-22 4M120 166q10 12 22 4" fill="none"/>
+<path d="M112 176q8 18 16 0" fill="#FF8FA3"/>
+</g>
+</svg>

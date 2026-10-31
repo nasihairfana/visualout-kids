@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "ice-cream". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M78 120h84l-42 100z" fill="#E8B26A"/>
+<path d="M90 140l50 40M100 120l52 42M84 150l40 30M150 140l-50 40M140 120l-52 42M156 150l-40 30" stroke="#C58A3E" stroke-width="4"/>
+<circle cx="120" cy="88" r="44" fill="#FFB3C7"/>
+<path d="M74 112c10 14 22 2 30 12s22 2 32-4 22 8 30-8" fill="#FFB3C7"/>
+<circle cx="120" cy="40" r="12" fill="#FF5A5F"/>
+<path d="M120 28q4-14 14-18" fill="none"/>
+<g stroke="none"><rect x="96" y="74" width="10" height="4" rx="2" fill="#4DABF7" transform="rotate(30 101 76)"/><rect x="132" y="68" width="10" height="4" rx="2" fill="#FFD43B" transform="rotate(-20 137 70)"/><rect x="118" y="96" width="10" height="4" rx="2" fill="#5BC27A"/><rect x="142" y="94" width="10" height="4" rx="2" fill="#845EF7" transform="rotate(40 147 96)"/></g>
+</g>
+</svg>

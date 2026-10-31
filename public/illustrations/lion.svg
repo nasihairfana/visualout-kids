@@ -1,0 +1,13 @@
+<!-- PLACEHOLDER illustration for "lion". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<g fill="#E8590C"><circle cx="202" cy="120" r="30"/><circle cx="191" cy="161" r="30"/><circle cx="161" cy="191" r="30"/><circle cx="120" cy="202" r="30"/><circle cx="79" cy="191" r="30"/><circle cx="49" cy="161" r="30"/><circle cx="38" cy="120" r="30"/><circle cx="49" cy="79" r="30"/><circle cx="79" cy="49" r="30"/><circle cx="120" cy="38" r="30"/><circle cx="161" cy="49" r="30"/><circle cx="191" cy="79" r="30"/></g>
+<circle cx="120" cy="120" r="78" fill="#E8590C" stroke="none"/>
+<circle cx="72" cy="72" r="16" fill="#FFC14D"/><circle cx="168" cy="72" r="16" fill="#FFC14D"/>
+<circle cx="120" cy="126" r="62" fill="#FFC14D"/>
+<circle cx="98" cy="116" r="8" fill="#2B2240" stroke="none"/><circle cx="100.5" cy="113.5" r="2.8" fill="#fff" stroke="none"/><circle cx="142" cy="116" r="8" fill="#2B2240" stroke="none"/><circle cx="144.5" cy="113.5" r="2.8" fill="#fff" stroke="none"/><ellipse cx="86" cy="140" rx="10" ry="6" fill="#FF9BB3" opacity=".7" stroke="none"/><ellipse cx="154" cy="140" rx="10" ry="6" fill="#FF9BB3" opacity=".7" stroke="none"/>
+<ellipse cx="120" cy="158" rx="22" ry="16" fill="#FFE8B5" stroke="none"/>
+<path d="M112 142h16l-8 9z" fill="#8D5A3B"/>
+<path d="M120 151v6q-8 8-14 2M120 157q8 8 14 2" fill="none" stroke-width="4"/>
+</g>
+</svg>

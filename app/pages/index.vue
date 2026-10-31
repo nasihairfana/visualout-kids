@@ -1,0 +1,3 @@
+<template>
+  <AlphabetGameHome />
+</template>

@@ -1,0 +1,11 @@
+<!-- PLACEHOLDER illustration for "mango". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M70 82c30-34 100-30 120 20 18 48-10 102-60 106-40 4-70-26-74-62-2-22 2-46 14-64z" fill="#FFB020"/>
+<path d="M70 82c30-34 100-30 120 20" fill="none" stroke="none"/>
+<path d="M150 150c18-6 32-26 30-50" fill="none" stroke="#FF922B" stroke-width="10" opacity=".7"/>
+<path d="M118 62q-4-20 6-34" fill="none" stroke-width="7"/>
+<path d="M122 40c22-20 56-14 66 0-18 16-46 16-66 0z" fill="#5BC27A"/>
+<ellipse cx="88" cy="112" rx="10" ry="18" fill="#fff" opacity=".5" stroke="none" transform="rotate(25 88 112)"/>
+</g>
+</svg>

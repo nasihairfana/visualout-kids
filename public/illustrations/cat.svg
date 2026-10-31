@@ -1,0 +1,13 @@
+<!-- PLACEHOLDER illustration for "cat". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M52 108 46 40l52 34M188 108l6-68-52 34" fill="#FFA94D"/>
+<path d="M62 64l8 30 18-12zM178 64l-8 30-18-12z" fill="#FFC9C9" stroke="none"/>
+<ellipse cx="120" cy="134" rx="80" ry="70" fill="#FFA94D"/>
+<path d="M120 70v18M104 72l4 14M136 72l-4 14" stroke="#E8590C" stroke-width="6"/>
+<circle cx="92" cy="126" r="9" fill="#2B2240" stroke="none"/><circle cx="94.5" cy="123.5" r="3.1" fill="#fff" stroke="none"/><circle cx="148" cy="126" r="9" fill="#2B2240" stroke="none"/><circle cx="150.5" cy="123.5" r="3.1" fill="#fff" stroke="none"/><ellipse cx="78" cy="158" rx="10" ry="6" fill="#FF9BB3" opacity=".7" stroke="none"/><ellipse cx="162" cy="158" rx="10" ry="6" fill="#FF9BB3" opacity=".7" stroke="none"/>
+<path d="M113 150h14l-7 8z" fill="#FF8FA3"/>
+<path d="M120 158q-8 10-18 4M120 158q8 10 18 4" fill="none"/>
+<path d="M70 150l-34-6M70 160l-32 8M170 150l34-6M170 160l32 8" stroke-width="4"/>
+</g>
+</svg>

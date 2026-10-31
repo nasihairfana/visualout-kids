@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "juice". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M150 70l12-50h18" fill="none" stroke="#FF6B6B" stroke-width="8"/>
+<rect x="66" y="60" width="104" height="150" rx="14" fill="#FFD43B"/>
+<path d="M66 82h104" />
+<circle cx="118" cy="146" r="32" fill="#FFA94D"/>
+<path d="M118 114q16-14 28-8-6 14-28 8z" fill="#5BC27A"/>
+<circle cx="106" cy="142" r="6" fill="#2B2240" stroke="none"/><circle cx="108.5" cy="139.5" r="2.1" fill="#fff" stroke="none"/><circle cx="130" cy="142" r="6" fill="#2B2240" stroke="none"/><circle cx="132.5" cy="139.5" r="2.1" fill="#fff" stroke="none"/>
+<path d="M110 156 q8 7.2 16 0" fill="none"/>
+</g>
+</svg>

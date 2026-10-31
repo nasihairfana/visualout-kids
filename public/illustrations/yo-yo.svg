@@ -1,0 +1,11 @@
+<!-- PLACEHOLDER illustration for "yo-yo". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M120 20v58" stroke-width="5"/>
+<circle cx="120" cy="20" r="8" fill="#fff"/>
+<circle cx="120" cy="140" r="78" fill="#845EF7"/>
+<circle cx="120" cy="140" r="54" fill="#B197FC"/>
+<circle cx="120" cy="140" r="18" fill="#FFD43B"/>
+<path d="M120 86a54 54 0 0 1 40 18M66 140a54 54 0 0 1 10-30" fill="none" stroke="#fff" stroke-width="7" opacity=".7"/>
+</g>
+</svg>

@@ -1,0 +1,12 @@
+<!-- PLACEHOLDER illustration for "nest". Replace with original Visualout Kids artwork (same file name). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+<g stroke="#2B2240" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="96" cy="112" rx="18" ry="24" fill="#A5D8FF"/>
+<ellipse cx="144" cy="112" rx="18" ry="24" fill="#A5D8FF"/>
+<ellipse cx="120" cy="104" rx="18" ry="24" fill="#D0EBFF"/>
+<g stroke="none" fill="#74C0FC"><circle cx="90" cy="104" r="3"/><circle cx="150" cy="120" r="3"/><circle cx="126" cy="96" r="3"/></g>
+<path d="M30 120c4 60 40 86 90 86s86-26 90-86c-30 16-150 16-180 0z" fill="#B07B4F"/>
+<path d="M40 136q80 22 160 0M50 160q70 22 140 0M70 184q50 14 100 0" fill="none" stroke="#7A4E2D" stroke-width="5"/>
+<path d="M30 120q20-6 34 4M210 120q-20-6-34 4" fill="none" stroke="#7A4E2D" stroke-width="5"/>
+</g>
+</svg>
