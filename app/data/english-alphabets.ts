@@ -1,4 +1,5 @@
 import type { AlphabetLetter, AlphabetPack, CardTheme, LetterAssets, SpokenPhrase } from '~/types/learning'
+import audioManifest from './audio-manifest.json' with { type: 'json' }
 
 /**
  * English A–Z content for "My First ABC".
@@ -7,20 +8,22 @@ import type { AlphabetLetter, AlphabetPack, CardTheme, LetterAssets, SpokenPhras
  * - Illustrations: PLACEHOLDERS. Simple SVGs in /public/illustrations stand in until the
  *   original Visualout Kids artwork is ready. Replace a file in place and add its id to
  *   `FINAL_ART` below.
- * - Audio: NOT YET RECORDED. All audio paths are `null`; the audio service falls back to
- *   the device's on-device voice (if allowed in Parent settings) or stays silent.
+ * - Audio: GENERATED. `npm run audio` voices every clip with an offline neural voice and
+ *   writes `audio-manifest.json`. Anything still missing falls back to the device's
+ *   on-device voice (if allowed in Parent settings) or stays silent.
  *
- * To add a real asset: drop the file into /public at the path listed in ASSETS.md and
- * set the matching field below (or in `RECORDED` / `ILLUSTRATED`).
+ * To add a human recording: drop the file into /public at the path listed in ASSETS.md and
+ * re-run `npm run audio`. It never overwrites a file it didn't generate.
  */
 
-/** Letters whose human recordings exist in /public/audio/en. Add ids as files arrive. */
+/** Clips that exist in /public/audio/en, as found on disk by `npm run audio`. */
 const RECORDED = {
-  letters: new Set<string>([]),
-  words: new Set<string>([]),
-  objects: new Set<string>([]),
+  letters: new Set<string>(audioManifest.letters),
+  /** Letter ids, e.g. 'a' for apple.mp3. */
+  words: new Set<string>(audioManifest.words),
+  objects: new Set<string>(audioManifest.objects),
   /** Phrase file names (without .mp3), e.g. 'wonderful', 'where-is-a'. */
-  phrases: new Set<string>([]),
+  phrases: new Set<string>(audioManifest.phrases),
 }
 
 /** Letters whose /public/illustrations file is final artwork rather than a placeholder. */
@@ -30,13 +33,21 @@ const THEMES: CardTheme[] = ['peach', 'mint', 'sky', 'lilac', 'butter', 'rose']
 
 const slug = (word: string) => word.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')
 
+/** Where each clip lives, whether or not it exists yet. File names are listed in ASSETS.md. */
+const audioPaths = {
+  letter: (id: string) => `/audio/en/letters/${id}.mp3`,
+  word: (word: string) => `/audio/en/words/${slug(word)}.mp3`,
+  object: (word: string) => `/audio/en/objects/${slug(word)}.mp3`,
+  phrase: (id: string) => `/audio/en/phrases/${id}.mp3`,
+}
+
 function assetsFor(id: string, word: string): LetterAssets {
   return {
     illustration: `/illustrations/${slug(word)}.svg`,
     illustrationIsPlaceholder: !FINAL_ART.has(id),
-    letterAudio: RECORDED.letters.has(id) ? `/audio/en/letters/${id}.mp3` : null,
-    wordAudio: RECORDED.words.has(id) ? `/audio/en/words/${slug(word)}.mp3` : null,
-    objectSound: RECORDED.objects.has(id) ? `/audio/en/objects/${slug(word)}.mp3` : null,
+    letterAudio: RECORDED.letters.has(id) ? audioPaths.letter(id) : null,
+    wordAudio: RECORDED.words.has(id) ? audioPaths.word(word) : null,
+    objectSound: RECORDED.objects.has(id) ? audioPaths.object(word) : null,
   }
 }
 
@@ -83,9 +94,10 @@ export const englishAlphabets: AlphabetLetter[] = RAW.map(([upper, word, emoji],
   }
 })
 
-const phrase = (text: string, file: string): SpokenPhrase => ({
+const phrase = (text: string, id: string): SpokenPhrase => ({
+  id,
   text,
-  audio: RECORDED.phrases.has(file) ? `/audio/en/phrases/${file}.mp3` : null,
+  audio: RECORDED.phrases.has(id) ? audioPaths.phrase(id) : null,
 })
 
 export const englishAlphabetPack: AlphabetPack = {
@@ -105,4 +117,33 @@ export const englishAlphabetPack: AlphabetPack = {
     greatMatching: phrase('Great matching!', 'great-matching'),
   },
   backgroundMusic: null,
+}
+
+/** One audio file the pack can play. `text` is null for non-speech sounds (object sounds). */
+export interface AudioClip {
+  kind: 'letters' | 'words' | 'objects' | 'phrases'
+  /** The id that goes in `audio-manifest.json`: a letter id, or a phrase id. */
+  id: string
+  /** Path under /public. */
+  path: string
+  text: string | null
+}
+
+/** Every clip this pack can play, recorded or not. Used by `scripts/generate-audio.mjs`. */
+export function audioCatalog(): AudioClip[] {
+  const clips: AudioClip[] = englishAlphabets.flatMap(l => [
+    { kind: 'letters', id: l.id, path: audioPaths.letter(l.id), text: l.spokenLetter },
+    { kind: 'words', id: l.id, path: audioPaths.word(l.word), text: l.word },
+    { kind: 'objects', id: l.id, path: audioPaths.object(l.word), text: null },
+  ] satisfies AudioClip[])
+  const seen = new Set<string>()
+  for (const entry of Object.values(englishAlphabetPack.phrases)) {
+    const phrases = typeof entry === 'function' ? englishAlphabets.map(entry) : Array.isArray(entry) ? entry : [entry]
+    for (const p of phrases) {
+      if (seen.has(p.id)) continue
+      seen.add(p.id)
+      clips.push({ kind: 'phrases', id: p.id, path: audioPaths.phrase(p.id), text: p.text })
+    }
+  }
+  return clips
 }

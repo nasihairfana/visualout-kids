@@ -35,16 +35,43 @@ let initialised = false
 
 const hasSpeech = () => import.meta.client && 'speechSynthesis' in window
 
+/** Device-voice delivery. A natural pitch with a slightly slower pace sounds warm; a raised pitch sounds squeaky. */
+const VOICE_TUNING = { rate: 0.9, pitch: 1.0 }
+
+// Voice names are matched on the name only; every English voice's lang already says en-US / en-GB.
+/** macOS/iOS novelty voices. Never used for a child. */
+const NOVELTY_VOICES = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox)\b/i
+/** Old formant or "Eloquence" voices: understandable, but flat and robotic. */
+const ROBOTIC_VOICES = /\b(fred|junior|ralph|kathy|vicki|victoria|princess|agnes|bruce|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley)\b/i
+/** Warm, clear voices commonly installed on Apple, Android and Windows devices. */
+const WARM_VOICES = /\b(samantha|ava|allison|susan|karen|moira|tessa|serena|zoe|nicky|aria|jenny|ana|libby|sonia|google)\b/i
+/** Higher-quality variants of a voice. */
+const QUALITY_VOICES = /\b(enhanced|premium|natural|neural)\b/i
+
+function scoreVoice(v: SpeechSynthesisVoice, preferredLang: string): number {
+  let score = 0
+  if (WARM_VOICES.test(v.name)) score += 3
+  if (QUALITY_VOICES.test(v.name)) score += 2
+  if (ROBOTIC_VOICES.test(v.name)) score -= 3
+  if (v.lang.replace('_', '-').toLowerCase() === preferredLang.toLowerCase()) score += 1
+  return score
+}
+
 function pickVoice(lang: string): SpeechSynthesisVoice | null {
   if (cachedVoice !== undefined) return cachedVoice
   if (!hasSpeech()) return (cachedVoice = null)
   const voices = window.speechSynthesis.getVoices()
   if (!voices.length) return null // voices load async; try again next time
-  const matching = voices.filter(v => v.lang.toLowerCase().startsWith(lang))
-  // Prefer on-device voices so nothing depends on an online TTS service.
-  cachedVoice = matching.find(v => v.localService && /female|samantha|karen|zira|en-gb|en-us/i.test(`${v.name} ${v.lang}`))
-    ?? matching.find(v => v.localService)
-    ?? null // null → system default voice (on Android this is the on-device TTS engine)
+  const preferredLang = lang === 'en' ? 'en-US' : lang
+  // On-device voices only, so nothing depends on an online TTS service.
+  const candidates = voices.filter(v => v.localService && v.lang.toLowerCase().startsWith(lang) && !NOVELTY_VOICES.test(v.name))
+  let best: SpeechSynthesisVoice | null = null
+  let bestScore = -Infinity
+  for (const v of candidates) {
+    const score = scoreVoice(v, preferredLang)
+    if (score > bestScore) { best = v; bestScore = score }
+  }
+  cachedVoice = best // null → system default voice (on Android this is the on-device TTS engine)
   return cachedVoice
 }
 
@@ -73,7 +100,10 @@ function playFile(src: string, volume: number, myToken: number): Promise<boolean
       resolve(played)
     }
     el.addEventListener('ended', () => done(true))
-    el.addEventListener('pause', () => { if (myToken !== token) done(true) })
+    // Fires for our own stop, just before `ended`, and when the OS interrupts playback.
+    // Settle on all of them so a sequence never waits on a clip that won't resume. A pause caused
+    // by a load/decode failure is left to the `error` handler, so the device voice can step in.
+    el.addEventListener('pause', () => { if (myToken !== token || !el.error) done(true) })
     el.addEventListener('error', () => {
       // Missing or undecodable — don't keep retrying. (Ignore errors caused by our own stop.)
       if (myToken === token) unavailable.add(src)
@@ -95,8 +125,8 @@ function speakText(text: string, lang: string, volume: number, myToken: number):
     u.lang = lang === 'en' ? 'en-US' : lang
     const voice = pickVoice(lang)
     if (voice) u.voice = voice
-    u.rate = 0.82
-    u.pitch = 1.15
+    u.rate = VOICE_TUNING.rate
+    u.pitch = VOICE_TUNING.pitch
     u.volume = volume
     let settled = false
     const done = () => {
@@ -163,6 +193,12 @@ export function useAudio(lang = 'en') {
   if (import.meta.client && !initialised) {
     initialised = true
     if (hasSpeech()) window.speechSynthesis.onvoiceschanged = () => { cachedVoice = undefined }
+    // iOS/iPadOS: let speech and effects play even when the ring/silent switch is on.
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession
+    if (session) {
+      try { session.type = 'playback' }
+      catch { /* unsupported value — keep the browser default */ }
+    }
     // Never keep talking when the app is backgrounded.
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) { stopCurrent(); musicEl?.pause() }

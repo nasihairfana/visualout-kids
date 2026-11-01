@@ -115,9 +115,10 @@ app/
   pages/abc/                   My First ABC: index, explore, find, match, parents
 scripts/postbuild.mjs          After each build: per-game link-preview tags, Cloudflare Pages headers
 scripts/make-og-images.mjs     Renders the link-preview images in public/og (run by hand after changes)
+scripts/generate-audio.mjs     `npm run audio`: voices every clip offline with Kokoro, writes the audio manifest
 public/
   illustrations/               26 placeholder SVGs (see ASSETS.md)
-  audio/en/…                   Empty, waiting for recordings (see ASSETS.md)
+  audio/en/…                   Generated speech clips (see ASSETS.md)
   icons/                       App icons
 ```
 
@@ -141,7 +142,9 @@ The components never hard-code letters, words or phrases.
 
 - Only one voice clip plays at a time. New speech always stops the previous clip.
 - The fallback order is: **local recording → on-device system voice (if a parent allows it) → silence.**
-  The app never calls an online TTS API. It prefers voices that report `localService`.
+  The shipped clips are generated ahead of time (`npm run audio`), so the app never calls an online
+  TTS API. For the device voice it only uses voices that report `localService`, skips novelty voices
+  and prefers warm, high-quality ones (Samantha, Ava, Karen, "Enhanced"/"Natural" variants…).
   On Android, the system default is the on-device TTS engine.
 - The tap, success, try-again and celebrate sounds are synthesized with Web Audio, so they need no
   files. The "try again" sound is a warm rising tone, never a buzzer.
@@ -172,10 +175,10 @@ away from the game controls.
 
 ## Known gaps before release
 
-- **Offline install not yet verified on a real device.** The build precaches every file (63
-  entries, including all routes and illustrations), but the dev sandbox couldn't run a service worker.
+- **Offline install not yet verified on a real device.** The build precaches every file (234
+  entries, 2.5 MB, including all routes, illustrations and speech clips), but the dev sandbox couldn't run a service worker.
   Check this on an Android phone: install → airplane mode → relaunch.
-- All audio is still to be recorded, and all illustrations are placeholders. See [ASSETS.md](ASSETS.md).
+- Speech is generated, not yet human-recorded, and all illustrations are placeholders. See [ASSETS.md](ASSETS.md).
 - Usability testing with parents and children aged 2–3 is still to do.
 
 ## License
