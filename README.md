@@ -23,9 +23,28 @@ To install it on Android, open the deployed site in Chrome and choose **Add to H
 | Mode | Route | How it plays |
 |---|---|---|
 | **Explore** | `/explore?letter=a` | Shows one big letter (upper and lower case), a picture and the word. Tapping the letter says it, and tapping the picture says the word. You can use the big arrows or swipe. The A–Z grid button is for grown-ups. Going past Z shows "Great exploring!" |
-| **Find the letter** | `/find` | Asks "Where is A?" with 3 big letters. Wrong taps get a wiggle and encouragement, and after 2 misses the answer gently glows. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
-| **Match** | `/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It plays the same gentle rules as Find the letter |
-| Parents | `/parents` | Opened by **holding** the lock button on Home for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset, plus content status and privacy notes |
+| **Find the letter** | `/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
+| **Match** | `/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
+| Parents | `/parents` | Opened by **holding** the lock button on Home for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, plus content status and privacy notes |
+
+### Looking, not guessing
+
+With 3 choices and unlimited tries, tapping at random always wins in the end. Find the letter and
+Match are built so that looking pays off and guessing doesn't (see `useChoiceActivity.ts`):
+
+- **Wait, then look.** The choices are dimmed for the first second of each round, and while the question
+  is being asked, and the letter to find glows. A tap during the wait does nothing except bounce that letter.
+- **Calm pause for guesses.** A wrong tap within 0.8 s of the choices waking up counts as a guess. The
+  choices settle, the letter to find pulses, and the voice says "Look carefully!" before asking again.
+- **Wrong taps teach.** The tapped letter names itself ("That's M."), then the question repeats.
+- **Bigger reward for really looking.** Finding the answer on the first or second try gives a burst of
+  stars and "Wonderful!". After two misses the answer glows as a hint, and finding it then gives one star
+  and "You found it!". It's still warm, never a fail.
+- **Difficulty adapts.** Find the letter starts with very different shapes (A, O, S). When most recent
+  rounds are right first time, it moves to mixed letters, then to rounds with a look-alike (E with F,
+  B with P). If the child starts guessing again, it steps back down.
+- **Honest progress.** A letter only counts as recognised after 3 first-try picks in a row. This is
+  stored on the device only and shown in Parent settings.
 
 ## Project structure
 
@@ -36,9 +55,9 @@ app/
   composables/
     useAudio.ts                Audio service: one speech channel, fallbacks, synthesized effects, music
     useSoundSettings.ts        Persisted parent sound settings (on-device only)
-    useGameProgress.ts         Which letters were explored (on-device only, no identifiers)
+    useGameProgress.ts         Explored letters, first-try history, difficulty level (on-device only)
     useAlphabetGame.ts         Content access, round generation (avoids look-alike letters), round sessions
-    useChoiceActivity.ts       Reusable "pick 1 of 3" engine: unlimited tries, hints, no score
+    useChoiceActivity.ts       Reusable "pick 1 of 3" engine: wait-then-look, calm pause, hints, no score
   components/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
                                LetterQuiz, LetterObjectMatch, ObjectIllustration
@@ -75,8 +94,8 @@ The components never hard-code letters, words or phrases.
 ## Child safety & privacy
 
 The app has no login, ads, purchases, analytics, trackers, external links, notifications or social
-features. The only data stored is sound preferences and a list of explored letter ids, kept in
-`localStorage` on the device. Parents can clear it. Parent settings sit behind a press-and-hold gate,
+features. The only data stored is sound preferences, explored letter ids and whether each letter was
+recently picked right first time, kept in `localStorage` on the device. Parents can clear it. Parent settings sit behind a press-and-hold gate,
 away from the game controls.
 
 ## Accessibility & touch

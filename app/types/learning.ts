@@ -67,7 +67,14 @@ export interface AlphabetPack {
     whereIs: (letter: AlphabetLetter) => SpokenPhrase
     whichStartsWith: (letter: AlphabetLetter) => SpokenPhrase
     letterIsFor: (letter: AlphabetLetter) => SpokenPhrase
+    /** Names a wrongly tapped letter, e.g. "That's M." */
+    thatIs: (letter: AlphabetLetter) => SpokenPhrase
+    /** Big praise, for picks made without the hint. */
     praise: SpokenPhrase[]
+    /** Softer praise, for picks made after the hint appeared. */
+    foundIt: SpokenPhrase
+    /** Said when a wrong tap came too quickly to have been a real look. */
+    lookCarefully: SpokenPhrase
     tryAgain: SpokenPhrase[]
     greatExploring: SpokenPhrase
     greatFinding: SpokenPhrase

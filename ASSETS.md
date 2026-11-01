@@ -43,9 +43,11 @@ nest orange parrot queen rabbit sun tiger umbrella van watermelon xylophone yo-y
 | `where-is-{id}.mp3` (26) | "Where is A?" |
 | `which-starts-with-{id}.mp3` (26) | "A. Which one starts with A?" |
 | `{id}-is-for.mp3` (26) | "A is for Apple!" |
+| `thats-{id}.mp3` (26) | "That's A." Said when a wrong letter is tapped |
 | `wonderful.mp3` | "Wonderful!" |
 | `well-done.mp3` | "Yay! Well done!" |
-| `you-found-it.mp3` | "You found it!" |
+| `you-found-it.mp3` | "You found it!" Softer praise, used after the hint |
+| `look-carefully.mp3` | "Look carefully!" Said gently, after a too-quick guess |
 | `try-again.mp3` | "Let's try again!" |
 | `almost.mp3` | "Almost! Try another one." |
 | `great-exploring.mp3` | "Great exploring!" |

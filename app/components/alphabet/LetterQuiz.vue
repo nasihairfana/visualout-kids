@@ -1,60 +1,79 @@
 <script setup lang="ts">
 /**
- * Mode 2 — Find the Letter. "Where is A?" with three big letters.
+ * Mode 2 — Find the Letter. "Where is A?" with a picture of A to match and three big letters.
+ * Every card is plain white with dark ink, so the only way to find the twin is by its shape.
  */
 const { clips, pack } = useAlphabetGame()
 
 const game = useChoiceActivity({
+  mode: 'find',
   rounds: 5,
+  adaptive: true,
   instruction: t => [clips.phrase(pack.phrases.whereIs(t))],
   onCorrect: t => [clips.phrase(pack.phrases.letterIsFor(t))],
-  onIncorrect: picked => [clips.letter(picked)],
+  onIncorrect: picked => [clips.phrase(pack.phrases.thatIs(picked))],
 })
-const { round, roundNumber, total, finished, solved, showHint, wiggling } = game
+const { round, roundNumber, total, finished, solved, showHint, wiggling, waiting, calming, nudges, celebration } = game
+
+// Tapping while the choices wait bounces the letter to look at.
+const sampleBounce = ref(false)
+watch(nudges, () => {
+  sampleBounce.value = false
+  requestAnimationFrame(() => { sampleBounce.value = true })
+})
 </script>
 
 <template>
-  <div class="safe-screen flex flex-col gap-4 bg-sky/50">
+  <div class="safe-screen flex flex-col gap-3 bg-sky/50">
     <GameTopBar>
       <RoundProgress :current="roundNumber" :total="total" />
     </GameTopBar>
 
-    <section class="flex flex-col items-center gap-2">
-      <button
-        type="button"
-        class="toy-press flex min-h-20 items-center gap-4 rounded-full bg-white py-3 pl-4 pr-8"
-        :aria-label="`Where is ${round.target.uppercase}? Tap to hear again.`"
-        @click="game.instruct()"
-      >
-        <span class="grid size-14 place-items-center rounded-full bg-sky text-sky-ink"><AppIcon name="speaker" class="size-8" /></span>
-        <span class="text-3xl font-black text-ink sm:text-4xl">Where is {{ round.target.uppercase }}?</span>
-      </button>
-    </section>
+    <div class="flex min-h-0 flex-1 flex-col gap-3 landscape:flex-row landscape:items-center landscape:justify-center landscape:gap-[5vw]">
+      <section class="flex items-center justify-center gap-4 landscape:flex-col-reverse">
+        <button
+          type="button"
+          class="toy-press grid size-16 shrink-0 place-items-center rounded-full bg-white text-sky-ink"
+          :aria-label="`Where is ${round.target.uppercase}? Tap to hear again.`"
+          @click="game.instruct()"
+        >
+          <AppIcon name="speaker" class="size-8" />
+        </button>
+        <div
+          class="rounded-[2.4rem] border-4 border-dashed border-sky-ink/40 bg-sky p-2"
+          :class="[(waiting || calming) && !solved && 'animate-glow', sampleBounce && 'animate-bounce-soft']"
+          @animationend="sampleBounce = false"
+        >
+          <div class="size-[min(13vh,30vw)] landscape:size-[min(20vh,13vw)]">
+            <AlphabetCard :key="round.target.id" :letter="round.target" size="sample" plain :show-lowercase="false" :speak-on-tap="false" class="animate-pop" @tap="game.instruct()" />
+          </div>
+        </div>
+      </section>
 
-    <main class="flex min-h-0 flex-1 flex-col items-center justify-center gap-[2.5vh] sm:flex-row sm:gap-[4vw] landscape:flex-row landscape:gap-[4vw]">
-      <div
-        v-for="choice in round.choices"
-        :key="`${roundNumber}-${choice.id}`"
-        class="size-[min(21vh,58vw)] shrink-0 transition-all duration-300 sm:size-[min(27vw,32vh)] landscape:size-[min(27vw,46vh)]"
-        :class="[
-          wiggling === choice.id && 'animate-wiggle',
-          solved && choice.id !== round.target.id && 'scale-90 opacity-40',
-          solved && choice.id === round.target.id && 'scale-105',
-          showHint && choice.id === round.target.id && 'animate-glow rounded-blob',
-        ]"
+      <main
+        class="flex min-h-0 flex-1 flex-col items-center justify-center gap-[1.8vh] transition-opacity duration-300 sm:flex-row sm:gap-[4vw] landscape:flex-none landscape:flex-row landscape:gap-[3vw]"
+        :class="!solved && (calming ? 'opacity-40' : waiting && 'opacity-70')"
       >
-        <AlphabetCard :letter="choice" size="choice" :show-lowercase="false" :speak-on-tap="false" :class="solved && choice.id === round.target.id && 'ring-8 ring-sunny'" @tap="game.pick" />
-      </div>
-    </main>
+        <div
+          v-for="choice in round.choices"
+          :key="`${roundNumber}-${choice.id}`"
+          class="size-[min(16.5vh,50vw)] shrink-0 transition-all duration-300 sm:size-[min(27vw,30vh)] landscape:size-[min(20vw,40vh)]"
+          :class="[
+            wiggling === choice.id && 'animate-wiggle',
+            calming && !solved && 'scale-95',
+            solved && choice.id !== round.target.id && 'scale-90 opacity-40',
+            solved && choice.id === round.target.id && 'scale-105',
+            showHint && !waiting && choice.id === round.target.id && 'animate-glow rounded-blob',
+          ]"
+        >
+          <AlphabetCard :letter="choice" size="choice" plain :show-lowercase="false" :speak-on-tap="false" :class="solved && choice.id === round.target.id && 'ring-8 ring-sunny'" @tap="game.pick" />
+        </div>
+      </main>
+    </div>
 
     <footer class="flex h-24 items-center justify-center">
       <Transition enter-from-class="opacity-0 scale-50" enter-active-class="transition duration-300">
-        <div v-if="solved" class="flex items-center gap-4">
-          <AppIcon name="star" class="size-16 animate-pop text-sunny drop-shadow" />
-          <button type="button" class="toy-press grid size-24 place-items-center rounded-full bg-sunny text-ink" aria-label="Next" @click="game.nextRound()">
-            <AppIcon name="next" class="size-12 animate-nudge" />
-          </button>
-        </div>
+        <RoundReward v-if="solved" :celebration="celebration" @next="game.nextRound()" />
       </Transition>
     </footer>
 

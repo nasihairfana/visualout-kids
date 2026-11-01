@@ -19,7 +19,7 @@ import type { SpokenClip } from '~/types/learning'
  */
 
 
-export type EffectName = 'tap' | 'page' | 'success' | 'tryAgain' | 'celebrate'
+export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'tryAgain' | 'celebrate'
 
 // ---- module singletons (client only) ---------------------------------------------------
 
@@ -120,6 +120,8 @@ const NOTES: Record<EffectName, Array<[freq: number, start: number, dur: number]
   tap: [[660, 0, 0.08]],
   page: [[523, 0, 0.07], [784, 0.06, 0.09]],
   success: [[523, 0, 0.12], [659, 0.1, 0.12], [784, 0.2, 0.12], [1047, 0.3, 0.28]],
+  // Gentler than `success`: for a pick made with the hint's help.
+  found: [[523, 0, 0.12], [784, 0.12, 0.22]],
   // Deliberately warm and "rising" — an invitation, never a buzzer.
   tryAgain: [[392, 0, 0.14], [523, 0.14, 0.2]],
   celebrate: [[523, 0, 0.1], [659, 0.09, 0.1], [784, 0.18, 0.1], [1047, 0.27, 0.12], [784, 0.4, 0.1], [1047, 0.5, 0.12], [1319, 0.6, 0.35]],

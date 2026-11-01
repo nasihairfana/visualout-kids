@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Parent area: sound, voice, progress reset and privacy notes. No links out, no accounts. */
 const { settings, reset: resetSettings } = useSoundSettings()
-const { exploredCount, reset: resetProgress } = useGameProgress()
+const { exploredCount, letterStatus, levelOf, reset: resetProgress } = useGameProgress()
 const { letters, pack } = useAlphabetGame()
 const { say, effect, deviceVoiceSupported } = useAudio()
 
@@ -12,6 +12,11 @@ const recorded = {
   art: letters.filter(l => l.assets.illustration && !l.assets.illustrationIsPlaceholder).length,
 }
 const confirmReset = ref(false)
+
+const LEVEL_NAMES = ['Very different letters', 'Mixed letters', 'Includes look-alikes (like E and F)']
+const STATUS_CLASSES = { known: 'bg-mint text-mint-ink', practising: 'bg-butter text-butter-ink', new: 'bg-cream text-ink-soft/60' }
+const shapes = computed(() => letters.map(l => ({ letter: l, status: letterStatus('find', l.id) })))
+const knownCount = (mode: 'find' | 'match') => letters.filter(l => letterStatus(mode, l.id) === 'known').length
 
 function testVoice() {
   effect('tap')
@@ -72,7 +77,30 @@ function clearProgress() {
 
     <section class="rounded-3xl bg-white p-5 shadow-sm">
       <h2 class="mb-2 text-xl font-black">Progress</h2>
-      <p class="mb-4 text-ink-soft">Letters looked at: <b class="text-ink">{{ exploredCount }} / {{ letters.length }}</b>. Stored only on this device.</p>
+      <p class="mb-2 text-ink-soft">Letters looked at: <b class="text-ink">{{ exploredCount }} / {{ letters.length }}</b>. Stored only on this device.</p>
+
+      <h3 class="mt-4 font-black">Letter shapes recognised</h3>
+      <p class="mb-3 text-sm text-ink-soft">
+        From Find the letter. A letter counts as recognised after it's picked right on the first try 3 times in a row,
+        so lucky guesses don't count.
+      </p>
+      <ul class="mb-3 grid grid-cols-7 gap-1.5 sm:grid-cols-13" aria-label="Letter shapes recognised">
+        <li
+          v-for="{ letter, status } in shapes"
+          :key="letter.id"
+          class="grid aspect-square place-items-center rounded-xl text-lg font-black"
+          :class="STATUS_CLASSES[status]"
+          :aria-label="`${letter.uppercase}: ${status === 'known' ? 'recognised' : status === 'practising' ? 'practising' : 'not tried yet'}`"
+        >
+          {{ letter.uppercase }}
+        </li>
+      </ul>
+      <ul class="mb-4 space-y-1 text-sm text-ink-soft">
+        <li><span class="mr-1 inline-block size-3 rounded bg-mint" /> Recognised · <span class="mr-1 inline-block size-3 rounded bg-butter" /> Practising · <span class="mr-1 inline-block size-3 rounded border border-ink-soft/30 bg-cream" /> Not tried yet</li>
+        <li>Find the letter now uses: <b class="text-ink">{{ LEVEL_NAMES[levelOf('find')] }}</b>. It moves up or down on its own.</li>
+        <li>Starting sounds recognised in Match: <b class="text-ink">{{ knownCount('match') }} / {{ letters.length }}</b></li>
+      </ul>
+
       <button v-if="!confirmReset" type="button" class="toy-press min-h-16 w-full rounded-2xl bg-cream font-bold" @click="confirmReset = true">
         Clear progress
       </button>

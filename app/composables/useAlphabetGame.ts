@@ -1,15 +1,20 @@
 import { computed, ref } from 'vue'
 import type { AlphabetLetter, AlphabetPack, SpokenClip } from '~/types/learning'
 import { englishAlphabetPack } from '~/data/english-alphabets'
+import type { ChoiceLevel } from '~/composables/useGameProgress'
 
 /**
- * Letters toddlers commonly confuse. We avoid putting these side by side in the
- * three-choice rounds so early success stays high.
+ * Capital letters toddlers commonly confuse (Find the letter shows capitals only).
+ * Each string is a group of shapes that look alike; the map below links every pair.
  */
-const LOOKALIKES: Record<string, string[]> = {
-  b: ['d', 'p'], d: ['b', 'p'], p: ['b', 'd', 'q'], q: ['p', 'o'],
-  m: ['n', 'w'], n: ['m', 'u'], w: ['m', 'v'], v: ['w', 'u', 'y'], u: ['n', 'v'],
-  o: ['q', 'c'], c: ['o', 'g'], g: ['c'], e: ['f'], f: ['e'], i: ['l', 'j'], l: ['i'], j: ['i'],
+const LOOKALIKE_GROUPS = ['BPR', 'BD', 'DO', 'OQCG', 'EF', 'FP', 'MNW', 'NH', 'VUWY', 'UJ', 'ILTJ', 'TY', 'KXR', 'XY', 'ZS', 'ZN']
+const LOOKALIKES: Record<string, string[]> = {}
+for (const group of LOOKALIKE_GROUPS) {
+  for (const a of group.toLowerCase()) {
+    for (const b of group.toLowerCase()) {
+      if (a !== b && !LOOKALIKES[a]?.includes(b)) (LOOKALIKES[a] ??= []).push(b)
+    }
+  }
 }
 
 export interface Round {
@@ -24,18 +29,26 @@ export function useAlphabetGame(pack: AlphabetPack = englishAlphabetPack) {
   const byId = (id: string | undefined | null) => letters.find(l => l.id === id?.toLowerCase())
   const indexOf = (letter: AlphabetLetter) => letters.findIndex(l => l.id === letter.id)
 
-  /** Target + two clearly different distractors, shuffled. */
-  function makeRound(exclude: string[] = [], choiceCount = 3): Round {
+  /**
+   * Target + distractors, shuffled. `level` sets how alike they look:
+   * 0 = clearly different shapes, 1 = any letters, 2 = one look-alike when the target has one.
+   */
+  function makeRound(exclude: string[] = [], level: ChoiceLevel = 0, choiceCount = 3): Round {
     const pool = letters.filter(l => !exclude.includes(l.id))
     const target = pickOne(pool.length ? pool : letters)
-    const avoid = new Set([target.id, ...(LOOKALIKES[target.id] ?? [])])
     const distractors: AlphabetLetter[] = []
+    if (level >= 2) {
+      const twin = shuffle(LOOKALIKES[target.id] ?? []).map(byId).find(Boolean)
+      if (twin) distractors.push(twin)
+    }
+    const avoid = new Set([target.id, ...distractors.map(d => d.id)])
+    if (level === 0) (LOOKALIKES[target.id] ?? []).forEach(id => avoid.add(id))
     for (const candidate of shuffle(letters)) {
       if (distractors.length >= choiceCount - 1) break
       if (avoid.has(candidate.id)) continue
       distractors.push(candidate)
-      ;(LOOKALIKES[candidate.id] ?? []).forEach(id => avoid.add(id))
       avoid.add(candidate.id)
+      if (level === 0) (LOOKALIKES[candidate.id] ?? []).forEach(id => avoid.add(id))
     }
     return { target, choices: shuffle([target, ...distractors]) }
   }

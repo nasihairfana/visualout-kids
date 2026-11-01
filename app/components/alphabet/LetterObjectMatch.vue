@@ -5,12 +5,20 @@
 const { clips, pack } = useAlphabetGame()
 
 const game = useChoiceActivity({
+  mode: 'match',
   rounds: 5,
   instruction: t => [clips.phrase(pack.phrases.whichStartsWith(t))],
   onCorrect: t => [clips.phrase(pack.phrases.letterIsFor(t))],
   onIncorrect: picked => [clips.word(picked)],
 })
-const { round, roundNumber, total, finished, solved, showHint, wiggling } = game
+const { round, roundNumber, total, finished, solved, showHint, wiggling, waiting, calming, nudges, celebration } = game
+
+// Tapping while the pictures wait bounces the letter to look at.
+const letterBounce = ref(false)
+watch(nudges, () => {
+  letterBounce.value = false
+  requestAnimationFrame(() => { letterBounce.value = true })
+})
 </script>
 
 <template>
@@ -21,7 +29,13 @@ const { round, roundNumber, total, finished, solved, showHint, wiggling } = game
 
     <main class="flex min-h-0 flex-1 flex-col items-center justify-center gap-[3vh] landscape:flex-row landscape:gap-[5vw]">
       <div class="flex flex-col items-center gap-3">
-        <AlphabetCard :key="round.target.id" :letter="round.target" class="animate-pop" />
+        <div
+          class="rounded-blob"
+          :class="[(waiting || calming) && !solved && 'animate-glow', letterBounce && 'animate-bounce-soft']"
+          @animationend="letterBounce = false"
+        >
+          <AlphabetCard :key="round.target.id" :letter="round.target" class="animate-pop" />
+        </div>
         <button
           type="button"
           class="toy-press grid size-16 place-items-center rounded-full bg-white text-ink"
@@ -32,7 +46,10 @@ const { round, roundNumber, total, finished, solved, showHint, wiggling } = game
         </button>
       </div>
 
-      <div class="grid w-full max-w-xl grid-cols-3 gap-[3vw] landscape:max-w-[min(58vw,105vh)]">
+      <div
+        class="grid w-full max-w-xl grid-cols-3 gap-[3vw] transition-opacity duration-300 landscape:max-w-[min(58vw,105vh)]"
+        :class="!solved && (calming ? 'opacity-40' : waiting && 'opacity-70')"
+      >
         <button
           v-for="choice in round.choices"
           :key="`${roundNumber}-${choice.id}`"
@@ -40,9 +57,10 @@ const { round, roundNumber, total, finished, solved, showHint, wiggling } = game
           class="toy-press grid aspect-square place-items-center rounded-[2rem] bg-white p-2 transition-all duration-300"
           :class="[
             wiggling === choice.id && 'animate-wiggle',
+            calming && !solved && 'scale-95',
             solved && choice.id !== round.target.id && 'scale-90 opacity-40',
             solved && choice.id === round.target.id && 'scale-105 ring-8 ring-sunny',
-            showHint && choice.id === round.target.id && 'animate-glow',
+            showHint && !waiting && choice.id === round.target.id && 'animate-glow',
           ]"
           :aria-label="choice.word"
           @click="game.pick(choice)"
@@ -55,12 +73,7 @@ const { round, roundNumber, total, finished, solved, showHint, wiggling } = game
 
     <footer class="flex h-24 items-center justify-center">
       <Transition enter-from-class="opacity-0 scale-50" enter-active-class="transition duration-300">
-        <div v-if="solved" class="flex items-center gap-4">
-          <AppIcon name="star" class="size-16 animate-pop text-sunny drop-shadow" />
-          <button type="button" class="toy-press grid size-24 place-items-center rounded-full bg-sunny text-ink" aria-label="Next" @click="game.nextRound()">
-            <AppIcon name="next" class="size-12 animate-nudge" />
-          </button>
-        </div>
+        <RoundReward v-if="solved" :celebration="celebration" @next="game.nextRound()" />
       </Transition>
     </footer>
 
