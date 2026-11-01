@@ -18,6 +18,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Always plain static files in .output/public. On Cloudflare, Nuxt would otherwise pick its
+  // Cloudflare preset, which writes to dist/ with its own _headers/_redirects and skips ours.
+  nitro: {
+    preset: 'static',
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },
