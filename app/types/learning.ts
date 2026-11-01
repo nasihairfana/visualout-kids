@@ -54,6 +54,8 @@ export interface SpokenClip {
 
 /** A short spoken phrase used for instructions and encouragement. */
 export interface SpokenPhrase {
+  /** Stable name of its recording, e.g. `where-is-a` → `/audio/en/phrases/where-is-a.mp3`. */
+  id: string
   text: string
   /** Human recording. `null` until supplied. */
   audio: string | null

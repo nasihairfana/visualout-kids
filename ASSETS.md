@@ -1,17 +1,17 @@
 # My First ABC — assets to supply
 
-The game runs today without any recorded audio or final artwork. This file lists exactly
+The game ships with generated speech and placeholder artwork. This file lists exactly
 what is still a placeholder and where real files go. **Nothing in the code points at a file
-that doesn't exist**: a path is only switched on once you register it in
-`app/data/english-alphabets.ts`.
+that doesn't exist**: a path is only switched on once it is listed in
+`app/data/audio-manifest.json`, which `npm run audio` writes from what is on disk.
 
 ## Current status
 
 | Asset | Status | What the app does meanwhile |
 |---|---|---|
-| Letter recordings (26) | **Missing** | Uses the device's built-in voice (if enabled by a parent) or stays silent |
-| Word recordings (26) | **Missing** | Same as above |
-| Phrase recordings (instructions & praise) | **Missing** | Same as above |
+| Letter recordings (26) | **Generated** (Kokoro `af_heart`) | Can be replaced by human recordings at any time |
+| Word recordings (26) | **Generated** | Same as above |
+| Phrase recordings (113, instructions & praise) | **Generated** | Same as above |
 | Object sounds (optional) | **Missing** | No sound. These are optional extras |
 | Background music (optional) | **Missing** | The toggle is disabled in Parent settings |
 | Illustrations (26) | **Placeholder SVGs** in `public/illustrations/` | Simple stand-in drawings. If a file fails to load, an emoji is shown instead |
@@ -65,18 +65,30 @@ under 1.5 seconds. They only play after the word, when the child taps the pictur
 Use a soft loop of 30 to 60 seconds with no lyrics. Set `backgroundMusic` in the pack. Music
 stays **off by default**, and a parent has to turn it on.
 
-### Registering recordings
+### Generated speech (`npm run audio`)
 
-After you copy files in, add their ids to `RECORDED` in `app/data/english-alphabets.ts`:
+`scripts/generate-audio.mjs` voices every letter, word and phrase with
+[Kokoro](https://huggingface.co/hexgrad/Kokoro-82M), an open (Apache-2.0) neural TTS model that runs
+on your machine. Nothing is sent online and the app itself never calls a TTS service. Voice
+`af_heart` at 0.9× speed. Each clip is trimmed, gently compressed, brought to −16 LUFS under a peak limiter and saved in the
+format above.
 
-```ts
-const RECORDED = {
-  letters: new Set(['a', 'b', 'c']),          // → /audio/en/letters/a.mp3 …
-  words: new Set(['a', 'b', 'c']),            // → /audio/en/words/apple.mp3 …
-  objects: new Set(['a']),                    // → /audio/en/objects/apple.mp3
-  phrases: new Set(['wonderful', 'where-is-a']),
-}
+```sh
+npm run audio              # voice anything missing, then rewrite the manifest
+npm run audio -- --force   # re-voice clips the script made before (after changing the voice or text)
+npm run audio -- --scan    # just rescan public/audio and rewrite the manifest
 ```
+
+The first run downloads the model (about 330 MB) to the Hugging Face cache. The clip list comes from
+`audioCatalog()` in `app/data/english-alphabets.ts`, so a new phrase there is picked up
+automatically. If the model mispronounces something, add a respelling in `engineText()` in the
+script. It already says "Eh is for Apple" so "A" isn't read as the article "uh".
+
+### Replacing with human recordings
+
+Copy the file over the generated one at the same path, then run `npm run audio -- --scan`.
+The manifest's `generated` map stores a hash of every file the script made. A file you replace no
+longer matches, so it drops out of that map and is never overwritten, even with `--force`.
 
 The service worker precaches everything in `public/audio`, so recordings work offline after the
 next install or update. If a registered file is missing or broken, the app logs nothing to the
