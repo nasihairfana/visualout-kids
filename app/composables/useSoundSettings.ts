@@ -13,11 +13,12 @@ export interface SoundSettings {
   autoInstructions: boolean
 }
 
-const STORAGE_KEY = 'vk.abc.sound-settings.v1'
+const STORAGE_KEY = 'vk.abc.sound-settings.v2'
+const LEGACY_KEY = 'vk.abc.sound-settings.v1'
 
 const DEFAULTS: SoundSettings = {
   soundOn: true,
-  volume: 0.8,
+  volume: 1,
   musicOn: false,
   deviceVoiceFallback: true,
   autoInstructions: true,
@@ -26,7 +27,13 @@ const DEFAULTS: SoundSettings = {
 function load(): SoundSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS }
+    if (raw) return { ...DEFAULTS, ...JSON.parse(raw) }
+    const legacy = localStorage.getItem(LEGACY_KEY)
+    if (!legacy) return { ...DEFAULTS }
+    const saved = JSON.parse(legacy) as Partial<SoundSettings>
+    // v1 defaulted to 0.8, which was too quiet on phones. Lift an untouched volume; keep everything else.
+    if (saved.volume === 0.8) saved.volume = DEFAULTS.volume
+    return { ...DEFAULTS, ...saved }
   }
   catch {
     return { ...DEFAULTS }
