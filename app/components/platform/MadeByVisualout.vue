@@ -16,7 +16,7 @@ defineProps<{ dark?: boolean }>()
     </p>
 
     <p v-if="brand.products.length" class="-mb-2 text-xs font-bold uppercase tracking-[0.18em]" :class="dark ? 'text-cream/60' : 'text-ink-soft'">
-      Also from Visualout
+      More from Visualout
     </p>
     <ul v-if="brand.products.length" class="grid gap-3 sm:grid-cols-2">
       <li v-for="product in brand.products" :key="product.name">
@@ -40,7 +40,7 @@ defineProps<{ dark?: boolean }>()
         rel="noopener noreferrer"
         class="toy-press inline-flex min-h-14 items-center rounded-full px-6 font-black"
         :class="dark ? 'bg-sunny text-ink' : 'bg-ink text-cream'"
-      >Visit Visualout ↗</a>
+      >Explore Visualout ↗</a>
       <a
         :href="brand.sourceUrl"
         target="_blank"

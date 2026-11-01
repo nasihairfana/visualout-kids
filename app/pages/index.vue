@@ -109,7 +109,7 @@ const year = new Date().getFullYear()
       </section>
 
       <section id="who" aria-labelledby="who-title" class="flex scroll-mt-6 flex-col gap-5 rounded-[2rem] bg-ink p-6 text-cream sm:p-10">
-        <p class="text-sm font-bold uppercase tracking-[0.2em] text-sunny">Who makes Visualout Kids</p>
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-sunny">A little about us</p>
         <h2 id="who-title" class="text-[clamp(2rem,5vw,3rem)] font-black leading-tight tracking-tight">Made with care by {{ brand.studio }}.</h2>
         <MadeByVisualout dark class="max-w-2xl" />
       </section>
