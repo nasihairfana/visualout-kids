@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "generate": "nuxt generate",
+    "generate": "nuxt generate && node scripts/write-headers.mjs",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"

@@ -18,6 +18,38 @@ npx serve .output/public   # or any static host
 To install it on Android, open the deployed site in Chrome and choose **Add to Home screen** or
 **Install app**. Once installed, it runs fully offline.
 
+## Deploy (Cloudflare Pages)
+
+The game is hosted on Cloudflare Pages, connected to this GitHub repo. Every push to `main`
+publishes the game, and every pull request gets its own preview link.
+
+One-time setup in the Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git**,
+pick this repo, then use these settings:
+
+| Setting | Value |
+|---|---|
+| Framework preset | None |
+| Build command | `npm run generate` |
+| Build output directory | `.output/public` |
+| Node version | Read from `.node-version` (22) |
+
+Then add a custom domain under **Custom domains** (for example `abc.visualout.com`). Keep that
+address for good: an installed app is tied to it, and a Play Store release later needs a domain
+you own. Leave Cloudflare Web Analytics **off**.
+
+`npm run generate` also writes `.output/public/_headers` (see `scripts/write-headers.mjs`). It contains:
+
+- **A strict Content-Security-Policy.** It only allows the app's own files, so nothing can load
+  from or send data to another site. The two inline scripts Nuxt adds to each page are allowed by
+  their exact hash, which is recalculated on every build.
+- **No camera, microphone or location access.** The policy also stops the app being shown inside
+  other sites (no framing) and sends no referrer to anyone.
+- **Caching rules.** `sw.js` and the manifest are never cached for long, so updates reach families.
+  Hashed build files are cached forever.
+
+After the first deploy, check offline mode on an Android phone: install the app, switch on
+airplane mode, then relaunch it.
+
 ## What's in the game
 
 | Mode | Route | How it plays |
@@ -64,6 +96,7 @@ app/
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, SoundToggle, AppIcon
   pages/                       index, explore, find, match, parents
+scripts/write-headers.mjs      Writes Cloudflare Pages security and cache headers after each build
 public/
   illustrations/               26 placeholder SVGs (see ASSETS.md)
   audio/en/…                   Empty, waiting for recordings (see ASSETS.md)
