@@ -19,6 +19,7 @@ watch(nudges, () => {
   letterBounce.value = false
   requestAnimationFrame(() => { letterBounce.value = true })
 })
+const gameHome = useGameHome()
 </script>
 
 <template>
@@ -82,7 +83,7 @@ watch(nudges, () => {
       message="Great matching!"
       :clip="clips.phrase(pack.phrases.greatMatching)"
       @replay="game.restart()"
-      @home="navigateTo('/')"
+      @home="navigateTo(gameHome)"
     />
   </div>
 </template>

@@ -1,7 +1,16 @@
-# My First ABC · Visualout Kids
+# Visualout Kids
 
-A gentle A–Z alphabet toy for children aged 2–3. It's the first game in **Visualout Kids**, an
-open-source educational platform by Visualout.
+Gentle, free learning games for toddlers, by [Visualout](https://www.visualout.com), at
+**[kids.visualout.com](https://kids.visualout.com)**. The first game is **My First ABC**, an A–Z
+alphabet game for children aged 2–3, at [`/abc`](https://kids.visualout.com/abc).
+
+| Path | For | What it is |
+|---|---|---|
+| `/` | Parents | The Visualout Kids home page: the games, the privacy promise, how to install, and who makes it |
+| `/abc` | Children | My First ABC. Each future game gets its own path next to it |
+
+The site installs as one app, **Visualout Kids**, which opens straight into `/abc`. Children never
+land on the home page from inside a game: every Home button goes back to the game's own home.
 
 It's built with Nuxt 4, Vue 3 (`<script setup lang="ts">`), TypeScript and Tailwind CSS v4. It's an
 installable PWA that works offline.
@@ -37,7 +46,9 @@ Then add a custom domain under **Custom domains** (for example `abc.visualout.co
 address for good: an installed app is tied to it, and a Play Store release later needs a domain
 you own. Leave Cloudflare Web Analytics **off**.
 
-`npm run generate` also writes `.output/public/_headers` (see `scripts/write-headers.mjs`). It contains:
+`npm run generate` also runs `scripts/postbuild.mjs`. It gives each game's pages their own title and
+link-preview tags, because WhatsApp and Facebook read the HTML without running the app. It also
+writes `.output/public/_headers`, which contains:
 
 - **A strict Content-Security-Policy.** It only allows the app's own files, so nothing can load
   from or send data to another site. The two inline scripts Nuxt adds to each page are allowed by
@@ -47,6 +58,8 @@ you own. Leave Cloudflare Web Analytics **off**.
 - **Caching rules.** `sw.js` and the manifest are never cached for long, so updates reach families.
   Hashed build files are cached forever.
 
+`public/_redirects` sends the old root addresses (`/find`, `/match`, …) to their new home under `/abc`.
+
 After the first deploy, check offline mode on an Android phone: install the app, switch on
 airplane mode, then relaunch it.
 
@@ -54,10 +67,10 @@ airplane mode, then relaunch it.
 
 | Mode | Route | How it plays |
 |---|---|---|
-| **Explore** | `/explore?letter=a` | Shows one big letter (upper and lower case), a picture and the word. Tapping the letter says it, and tapping the picture says the word. You can use the big arrows or swipe. The A–Z grid button is for grown-ups. Going past Z shows "Great exploring!" |
-| **Find the letter** | `/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
-| **Match** | `/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
-| Parents | `/parents` | Opened by **holding** the lock button on Home for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, plus content status and privacy notes |
+| **Explore** | `/abc/explore?letter=a` | Shows one big letter (upper and lower case), a picture and the word. Tapping the letter says it, and tapping the picture says the word. You can use the big arrows or swipe. The A–Z grid button is for grown-ups. Going past Z shows "Great exploring!" |
+| **Find the letter** | `/abc/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
+| **Match** | `/abc/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
+| Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, content status, privacy notes, and who makes Visualout Kids |
 
 ### Looking, not guessing
 
@@ -84,24 +97,36 @@ Match are built so that looking pays off and guessing doesn't (see `useChoiceAct
 app/
   types/learning.ts            Language-agnostic content model (AlphabetPack, AlphabetLetter, SpokenClip)
   data/english-alphabets.ts    English A–Z content, phrases, asset registration ← edit content here
+  data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
     useAudio.ts                Audio service: one speech channel, fallbacks, synthesized effects, music
     useSoundSettings.ts        Persisted parent sound settings (on-device only)
     useGameProgress.ts         Explored letters, first-try history, difficulty level (on-device only)
     useAlphabetGame.ts         Content access, round generation (avoids look-alike letters), round sessions
+    useGameHome.ts             The current game's home path (e.g. /abc), for Home buttons
     useChoiceActivity.ts       Reusable "pick 1 of 3" engine: wait-then-look, calm pause, hints, no score
   components/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
                                LetterQuiz, LetterObjectMatch, ObjectIllustration
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
-                               ParentGate, ParentSettings, RoundProgress, SoundToggle, AppIcon
-  pages/                       index, explore, find, match, parents
-scripts/write-headers.mjs      Writes Cloudflare Pages security and cache headers after each build
+                               ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
+    platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)
+  pages/index.vue              Visualout Kids home page (for parents)
+  pages/abc/                   My First ABC: index, explore, find, match, parents
+scripts/postbuild.mjs          After each build: per-game link-preview tags, Cloudflare Pages headers
+scripts/make-og-images.mjs     Renders the link-preview images in public/og (run by hand after changes)
 public/
   illustrations/               26 placeholder SVGs (see ASSETS.md)
   audio/en/…                   Empty, waiting for recordings (see ASSETS.md)
   icons/                       App icons
 ```
+
+### Adding another game
+
+1. Put its pages under `app/pages/<game>/` (for example `app/pages/numbers/`).
+2. Add it to `games` in `app/data/brand.ts`, so it appears on the home page.
+3. Add its link-preview details to `GAME_PAGES` in `scripts/postbuild.mjs`, and its image to
+   `scripts/make-og-images.mjs`.
 
 ### Adding another language later
 
@@ -126,8 +151,12 @@ The components never hard-code letters, words or phrases.
 
 ## Child safety & privacy
 
-The app has no login, ads, purchases, analytics, trackers, external links, notifications or social
-features. The only data stored is sound preferences, explored letter ids and whether each letter was
+The app has no login, ads, purchases, analytics, trackers, notifications or social features.
+Nothing a child can tap leads out of the app. Links to Visualout, MeqOS and the source code appear
+only on the parents' home page and in Parent settings, behind the press-and-hold gate. This follows
+the parental-gate rule in kids' app policies such as Google Play's Families policy. Those links
+carry `?ref=kids` so Visualout's own sites can count visits from here, and nothing in this app
+tracks anyone. The only data stored is sound preferences, explored letter ids and whether each letter was
 recently picked right first time, kept in `localStorage` on the device. Parents can clear it. Parent settings sit behind a press-and-hold gate,
 away from the game controls.
 

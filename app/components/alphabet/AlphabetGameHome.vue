@@ -34,7 +34,7 @@ function open(path: string) {
         type="button"
         class="toy-press relative flex min-h-[30vh] flex-col items-center justify-center gap-2 overflow-hidden rounded-blob bg-peach p-6 text-peach-ink portrait:sm:col-span-2 landscape:min-h-[60vh]"
         aria-label="Explore alphabets"
-        @click="open('/explore')"
+        @click="open('/abc/explore')"
       >
         <span class="flex items-baseline gap-2 font-black leading-none">
           <span class="text-[min(24vw,15vh)]">A</span><span class="text-[min(14vw,9vh)] opacity-80">a</span>
@@ -48,7 +48,7 @@ function open(path: string) {
         type="button"
         class="toy-press flex min-h-[19vh] flex-col items-center justify-center gap-2 rounded-blob bg-sky p-4 text-sky-ink landscape:min-h-[60vh]"
         aria-label="Find the letter"
-        @click="open('/find')"
+        @click="open('/abc/find')"
       >
         <span class="flex items-center gap-2 text-5xl font-black sm:text-6xl" aria-hidden="true">
           <span class="grid size-16 place-items-center rounded-2xl bg-white/70 sm:size-20">B</span>
@@ -63,7 +63,7 @@ function open(path: string) {
         type="button"
         class="toy-press flex min-h-[19vh] flex-col items-center justify-center gap-2 rounded-blob bg-mint p-4 text-mint-ink landscape:min-h-[60vh]"
         aria-label="Match letter to picture"
-        @click="open('/match')"
+        @click="open('/abc/match')"
       >
         <span class="flex items-center gap-3" aria-hidden="true">
           <span class="text-6xl font-black sm:text-7xl">B</span>
@@ -75,7 +75,7 @@ function open(path: string) {
     </main>
 
     <footer class="flex justify-start">
-      <ParentGate @unlock="open('/parents')" />
+      <ParentGate @unlock="open('/abc/parents')" />
     </footer>
   </div>
 </template>

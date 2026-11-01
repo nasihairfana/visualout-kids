@@ -1,11 +1,12 @@
 <script setup lang="ts">
 /** Home button · centre slot · sound toggle. Shared by every activity screen. */
 const { stop, effect } = useAudio()
+const gameHome = useGameHome()
 
 function goHome() {
   stop()
   effect('page')
-  navigateTo('/')
+  navigateTo(gameHome.value)
 }
 </script>
 

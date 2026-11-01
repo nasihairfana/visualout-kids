@@ -127,10 +127,15 @@ function clearProgress() {
       <ul class="list-disc space-y-1 pl-5">
         <li>No accounts, ads, purchases, tracking or analytics.</li>
         <li>No personal information is collected. Settings stay on this device.</li>
-        <li>No links leave the app. Works offline once installed.</li>
+        <li>Nothing a child can tap leaves the app. The only outside links are on this page and the parents' home page.</li>
+        <li>Works offline once installed.</li>
         <li>No timers, scores or reminders to come back.</li>
       </ul>
-      <p class="mt-3 text-sm">My First ABC is part of Visualout Kids, an open-source project by Visualout.</p>
+    </section>
+
+    <section class="rounded-3xl bg-white p-5 shadow-sm">
+      <h2 class="mb-3 text-xl font-black">Made with care by Visualout</h2>
+      <MadeByVisualout />
     </section>
   </div>
 </template>

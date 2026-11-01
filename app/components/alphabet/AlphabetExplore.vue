@@ -90,6 +90,7 @@ function onClickCapture(e: MouseEvent) {
 }
 
 onBeforeUnmount(stop)
+const gameHome = useGameHome()
 </script>
 
 <template>
@@ -166,7 +167,7 @@ onBeforeUnmount(stop)
       message="Great exploring!"
       :clip="clips.phrase(pack.phrases.greatExploring)"
       @replay="replay"
-      @home="navigateTo('/')"
+      @home="navigateTo(gameHome)"
     />
   </div>
 </template>

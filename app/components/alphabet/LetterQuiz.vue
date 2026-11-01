@@ -21,6 +21,7 @@ watch(nudges, () => {
   sampleBounce.value = false
   requestAnimationFrame(() => { sampleBounce.value = true })
 })
+const gameHome = useGameHome()
 </script>
 
 <template>
@@ -82,7 +83,7 @@ watch(nudges, () => {
       message="Great finding!"
       :clip="clips.phrase(pack.phrases.greatFinding)"
       @replay="game.restart()"
-      @home="navigateTo('/')"
+      @home="navigateTo(gameHome)"
     />
   </div>
 </template>

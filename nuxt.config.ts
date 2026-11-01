@@ -1,7 +1,10 @@
 import tailwindcss from '@tailwindcss/vite'
 
-// My First ABC is a fully client-side toy: no server, no accounts, no tracking.
+// Visualout Kids (kids.visualout.com) is fully client-side: no server, no accounts, no tracking.
+// `/` is the parent-facing home page; each game lives under its own path, starting with `/abc`.
 // `nuxt generate` produces a static bundle that the service worker caches for offline play.
+
+const SITE = 'https://kids.visualout.com'
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   ssr: false,
@@ -22,14 +25,24 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
-      title: 'My First ABC · Visualout Kids',
+      title: 'Visualout Kids · Free learning games for toddlers',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover' },
-        { name: 'description', content: 'A gentle A–Z alphabet toy for toddlers. Offline, ad-free and private.' },
+        { name: 'description', content: 'Gentle learning games for toddlers by Visualout. Free, no ads, no tracking, and they work offline.' },
         { name: 'theme-color', content: '#FFF4E6' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'referrer', content: 'no-referrer' },
+        // Link previews (WhatsApp, Facebook, X…). Game pages get their own copy from scripts/postbuild.mjs.
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'Visualout Kids' },
+        { property: 'og:title', content: 'Visualout Kids · Free learning games for toddlers' },
+        { property: 'og:description', content: 'Gentle learning games for toddlers by Visualout. Free, no ads, no tracking, and they work offline.' },
+        { property: 'og:url', content: `${SITE}/` },
+        { property: 'og:image', content: `${SITE}/og/visualout-kids.png` },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        { name: 'twitter:card', content: 'summary_large_image' },
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/icons/icon.svg' },
@@ -42,11 +55,12 @@ export default defineNuxtConfig({
     registerType: 'autoUpdate',
     injectRegister: 'auto',
     manifest: {
-      name: 'My First ABC · Visualout Kids',
-      short_name: 'My First ABC',
-      description: 'A gentle A–Z alphabet toy for toddlers.',
+      name: 'Visualout Kids',
+      short_name: 'Visualout Kids',
+      description: 'Gentle learning games for toddlers by Visualout. Free, private and offline.',
       lang: 'en',
-      start_url: '/',
+      // The installed app opens straight into a game, never the parents' page with its outside links.
+      start_url: '/abc/',
       scope: '/',
       display: 'standalone',
       orientation: 'any',

@@ -1,5 +1,10 @@
 /**
- * Writes `.output/public/_headers` for Cloudflare Pages after `nuxt generate`.
+ * Runs after `nuxt generate`:
+ *
+ * 1. Gives each game's pages their own title and link-preview tags. The site is a client-side app,
+ *    so every page starts as the same HTML, and WhatsApp/Facebook don't run JavaScript. Without
+ *    this, a shared /abc link would preview as the Visualout Kids home page.
+ * 2. Writes `.output/public/_headers` for Cloudflare Pages.
  *
  * The Content-Security-Policy only allows the app's own files, so nothing can load or send
  * anything to another site. Nuxt puts two small inline scripts in every page (an import map and
@@ -8,9 +13,19 @@
  */
 import { createHash } from 'node:crypto'
 import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 
 const OUT = '.output/public'
+const SITE = 'https://kids.visualout.com'
+
+/** Link-preview details per game, keyed by its folder in the build. */
+const GAME_PAGES = {
+  abc: {
+    title: 'My First ABC · Visualout Kids',
+    description: 'A gentle A–Z alphabet game for ages 2–3 by Visualout Kids. Free, no ads, no tracking, and it works offline.',
+    image: '/og/my-first-abc.png',
+  },
+}
 
 async function htmlFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true })
@@ -20,6 +35,28 @@ async function htmlFiles(dir) {
     return e.name.endsWith('.html') ? [path] : []
   }))
   return nested.flat()
+}
+
+const escapeAttr = text => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+
+function setMeta(html, attr, key, value) {
+  const tag = new RegExp(`<meta ${attr}="${key}" content="[^"]*">`)
+  if (!tag.test(html)) throw new Error(`postbuild: no <meta ${attr}="${key}"> to replace`)
+  return html.replace(tag, `<meta ${attr}="${key}" content="${escapeAttr(value)}">`)
+}
+
+for (const [dir, page] of Object.entries(GAME_PAGES)) {
+  for (const file of await htmlFiles(join(OUT, dir))) {
+    const path = `/${relative(OUT, file).replace(/index\.html$/, '')}`
+    let html = await readFile(file, 'utf8')
+    html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(page.title)}</title>`)
+    html = setMeta(html, 'name', 'description', page.description)
+    html = setMeta(html, 'property', 'og:title', page.title)
+    html = setMeta(html, 'property', 'og:description', page.description)
+    html = setMeta(html, 'property', 'og:url', `${SITE}${path}`)
+    html = setMeta(html, 'property', 'og:image', `${SITE}${page.image}`)
+    await writeFile(file, html)
+  }
 }
 
 // Inline <script> blocks that the browser executes (JSON data blocks are not scripts, so skip them).
