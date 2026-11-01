@@ -119,7 +119,9 @@ const gameHome = useGameHome()
           :aria-label="`${current.word}. Tap to hear it.`"
           @click="tapObject"
         >
-          <Transition mode="out-in" enter-from-class="opacity-0 translate-y-4" enter-active-class="transition duration-300" leave-to-class="opacity-0" leave-active-class="transition duration-150">
+          <!-- type="transition": the child also runs the endless float animation, and without this
+               Vue waits on that (its 4 s fallback) before the next object can enter. -->
+          <Transition type="transition" mode="out-in" enter-from-class="opacity-0 translate-y-4" enter-active-class="transition duration-300" leave-to-class="opacity-0" leave-active-class="transition duration-150">
             <div :key="current.id" :class="objectBounce ? 'animate-bounce-soft' : 'animate-float'" @animationend="objectBounce = false">
               <ObjectIllustration :letter="current" />
             </div>
