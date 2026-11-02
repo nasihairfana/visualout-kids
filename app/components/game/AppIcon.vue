@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Inline icon set — no icon font or network request needed offline.
-type IconName = 'speaker' | 'speaker-off' | 'home' | 'prev' | 'next' | 'grid' | 'lock' | 'replay' | 'close' | 'star'
+type IconName = 'speaker' | 'speaker-off' | 'home' | 'prev' | 'next' | 'grid' | 'lock' | 'replay' | 'close' | 'star' | 'pencil' | 'eraser' | 'hand'
 
 defineProps<{ name: IconName }>()
 </script>
@@ -36,6 +36,17 @@ defineProps<{ name: IconName }>()
       <path d="M4 4.5v4h4" />
     </template>
     <path v-else-if="name === 'close'" d="M6 6l12 12M18 6 6 18" stroke-width="3" />
+    <template v-else-if="name === 'pencil'">
+      <path d="M15.5 4.5l4 4L9 19H5v-4z" fill="currentColor" fill-opacity="0.15" />
+      <path d="M13 7l4 4" />
+    </template>
+    <template v-else-if="name === 'eraser'">
+      <path d="M14.5 4.5l5 5-8.5 8.5H7l-2.5-2.5a1.5 1.5 0 0 1 0-2.1z" fill="currentColor" fill-opacity="0.15" />
+      <path d="M9.5 9.5l5 5M11 18h8" />
+    </template>
+    <template v-else-if="name === 'hand'">
+      <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5a1.5 1.5 0 0 1 3 0V10m0-.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1-6 6h-.6a5 5 0 0 1-4-2l-2.6-3.6a1.5 1.5 0 0 1 2.3-1.9L9 13.5" fill="currentColor" fill-opacity="0.15" />
+    </template>
     <path v-else-if="name === 'star'" d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" fill="currentColor" />
   </svg>
 </template>

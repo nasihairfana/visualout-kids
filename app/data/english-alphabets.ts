@@ -115,6 +115,9 @@ export const englishAlphabetPack: AlphabetPack = {
     greatExploring: phrase('Great exploring!', 'great-exploring'),
     greatFinding: phrase('Great finding!', 'great-finding'),
     greatMatching: phrase('Great matching!', 'great-matching'),
+    letsWrite: (l) => phrase(`Let's write ${l.spokenLetter}!`, `lets-write-${l.id}`),
+    youWrote: (l) => phrase(`You wrote ${l.spokenLetter}!`, `you-wrote-${l.id}`),
+    greatWriting: phrase('Great writing!', 'great-writing'),
   },
   backgroundMusic: null,
 }

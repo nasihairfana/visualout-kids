@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import type { AlphabetLetter } from '~/types/learning'
 
-/** A–Z grid in a bottom sheet, for parents and older toddlers. Kept off the main screen. */
-const props = defineProps<{ open: boolean, currentId: string }>()
+/**
+ * A–Z grid in a bottom sheet, for parents and older toddlers. Kept off the main screen.
+ * A small dot marks letters already done: explored by default, or `doneIds` (e.g. written).
+ */
+const props = defineProps<{ open: boolean, currentId: string, doneIds?: Set<string> }>()
 const emit = defineEmits<{ select: [letter: AlphabetLetter], close: [] }>()
 
 const { letters } = useAlphabetGame()
@@ -33,7 +36,7 @@ const { exploredSet } = useGameProgress()
           @click="emit('select', l)"
         >
           {{ l.uppercase }}
-          <span v-if="exploredSet.has(l.id)" class="absolute right-1.5 top-1.5 size-2.5 rounded-full bg-ink/40" aria-hidden="true" />
+          <span v-if="(props.doneIds ?? exploredSet).has(l.id)" class="absolute right-1.5 top-1.5 size-2.5 rounded-full bg-ink/40" aria-hidden="true" />
         </button>
       </div>
     </div>

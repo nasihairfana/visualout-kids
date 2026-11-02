@@ -70,7 +70,21 @@ airplane mode, then relaunch it.
 | **Explore** | `/abc/explore?letter=a` | Shows one big letter (upper and lower case), a picture and the word. Tapping the letter says it, and tapping the picture says the word. You can use the big arrows or swipe. The A–Z grid button is for grown-ups. Going past Z shows "Great exploring!" |
 | **Find the letter** | `/abc/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
 | **Match** | `/abc/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
+| **Write** | `/abc/write?letter=a` | Trace a big dotted capital with a finger. A glowing dot first shows how; a green start dot and arrow mark where each line begins. Each traced line snaps solid with a chime, and the finished letter pops in full colour with its picture and "You wrote A!". The eraser wipes it to try again, and the hand button shows how again. Starts at the first letter not yet written |
 | Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, content status, privacy notes, and who makes Visualout Kids |
+
+### Writing for small fingers
+
+Write is tuned for 2- and 3-year-olds (see `LetterTracer.vue`):
+
+- **Wide path.** The finger only has to pass within about 13% of the letter's height of the line, and a
+  quick swipe still counts, because the points in between are checked too.
+- **Never wrong.** Scribbling off the line leaves crayon marks but no wiggle, buzzer or "try again".
+  Starting in the wrong place just pulses the green start dot.
+- **Lifting is fine.** Progress stays when the finger lifts, so a child can stop and carry on.
+- **Help when stuck.** After 7 seconds without progress, the glowing dot shows the current line again.
+- **Tuning.** `TOLERANCE`, `LOOKAHEAD` and `IDLE_MS` at the top of `LetterTracer.vue` are first guesses.
+  Adjust them after watching a toddler use it on a real phone.
 
 ### Looking, not guessing
 
@@ -97,6 +111,7 @@ Match are built so that looking pays off and guessing doesn't (see `useChoiceAct
 app/
   types/learning.ts            Language-agnostic content model (AlphabetPack, AlphabetLetter, SpokenClip)
   data/english-alphabets.ts    English A–Z content, phrases, asset registration ← edit content here
+  data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
     useAudio.ts                Audio service: one speech channel, fallbacks, synthesized effects, music
@@ -107,7 +122,8 @@ app/
     useChoiceActivity.ts       Reusable "pick 1 of 3" engine: wait-then-look, calm pause, hints, no score
   components/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
-                               LetterQuiz, LetterObjectMatch, ObjectIllustration
+                               LetterQuiz, LetterObjectMatch, ObjectIllustration,
+                               AlphabetWrite, LetterTracer (tracing: checkpoints, crayon, show-me)
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
     platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)
