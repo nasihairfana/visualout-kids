@@ -5,7 +5,7 @@ import { computed, watch } from 'vue'
  * whether they picked each letter right on the first try in the choice games.
  * No identifiers, no timestamps, never leaves the device. Parents can clear it.
  */
-export type PracticeMode = 'find' | 'match'
+export type PracticeMode = 'find' | 'match' | 'web'
 
 /** 0 = very different letters, 1 = any letters, 2 = includes a look-alike. */
 export type ChoiceLevel = 0 | 1 | 2
@@ -39,9 +39,9 @@ const empty = (): ProgressState => ({
   explored: [],
   lastLetter: null,
   written: [],
-  firstTry: { find: {}, match: {} },
-  recent: { find: [], match: [] },
-  level: { find: 0, match: 0 },
+  firstTry: { find: {}, match: {}, web: {} },
+  recent: { find: [], match: [], web: [] },
+  level: { find: 0, match: 0, web: 0 },
 })
 
 function load(): ProgressState {

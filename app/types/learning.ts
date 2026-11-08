@@ -86,6 +86,11 @@ export interface AlphabetPack {
     /** Said when the child finishes tracing a letter, e.g. "You wrote A!" */
     youWrote: (letter: AlphabetLetter) => SpokenPhrase
     greatWriting: SpokenPhrase
+    /** Webbo's question, e.g. "Catch the letter A!" */
+    catchTheLetter: (letter: AlphabetLetter) => SpokenPhrase
+    greatSwinging: SpokenPhrase
+    /** Webbo's web move, for the child to copy with their own hand. */
+    wiggleAndPoint: SpokenPhrase
   }
   /** Optional looping background track. Off by default; `null` = not installed. */
   backgroundMusic: string | null

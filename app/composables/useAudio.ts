@@ -19,7 +19,7 @@ import type { SpokenClip } from '~/types/learning'
  */
 
 
-export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'stroke' | 'tryAgain' | 'celebrate'
+export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'stroke' | 'tryAgain' | 'celebrate' | 'wiggle' | 'whoosh' | 'giggle'
 
 // ---- module singletons (client only) ---------------------------------------------------
 
@@ -151,12 +151,42 @@ const NOTES: Record<EffectName, Array<[freq: number, start: number, dur: number]
   page: [[523, 0, 0.07], [784, 0.06, 0.09]],
   success: [[523, 0, 0.12], [659, 0.1, 0.12], [784, 0.2, 0.12], [1047, 0.3, 0.28]],
   // Gentler than `success`: for a pick made with the hint's help.
+  found: [[523, 0, 0.12], [784, 0.12, 0.22]],
   // A line of a letter traced: small and bright, so it can repeat without getting tiring.
   stroke: [[784, 0, 0.08], [1047, 0.07, 0.14]],
-  found: [[523, 0, 0.12], [784, 0.12, 0.22]],
+  // Webbo wiggling its fingers: a quick, light trill.
+  wiggle: [[880, 0, 0.06], [988, 0.07, 0.06], [880, 0.14, 0.06], [988, 0.21, 0.06], [1175, 0.28, 0.08]],
+  // Webbo being tickled: a bouncy, rising giggle.
+  giggle: [[880, 0, 0.05], [1175, 0.06, 0.05], [988, 0.12, 0.05], [1319, 0.18, 0.05], [1175, 0.24, 0.05], [1568, 0.3, 0.1]],
+  // Played as a noise sweep, not notes (see `playWhoosh`).
+  whoosh: [],
   // Deliberately warm and "rising" — an invitation, never a buzzer.
   tryAgain: [[392, 0, 0.14], [523, 0.14, 0.2]],
   celebrate: [[523, 0, 0.1], [659, 0.09, 0.1], [784, 0.18, 0.1], [1047, 0.27, 0.12], [784, 0.4, 0.1], [1047, 0.5, 0.12], [1319, 0.6, 0.35]],
+}
+
+/** A soft rising "whoosh" for a web being thrown: filtered noise, swept upwards. */
+function playWhoosh(ctx: AudioContext, volume: number) {
+  const duration = 0.38
+  const buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * duration), ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
+  const noise = ctx.createBufferSource()
+  noise.buffer = buffer
+  const filter = ctx.createBiquadFilter()
+  filter.type = 'bandpass'
+  filter.Q.value = 1.4
+  const gain = ctx.createGain()
+  const t0 = ctx.currentTime + 0.01
+  filter.frequency.setValueAtTime(500, t0)
+  filter.frequency.exponentialRampToValueAtTime(2800, t0 + duration)
+  gain.gain.setValueAtTime(0.0001, t0)
+  gain.gain.exponentialRampToValueAtTime(0.35 * volume, t0 + 0.06)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration)
+  noise.connect(filter).connect(gain).connect(ctx.destination)
+  noise.start(t0)
+  noise.stop(t0 + duration + 0.02)
+  return noise
 }
 
 function playEffect(name: EffectName, volume: number) {
@@ -168,6 +198,10 @@ function playEffect(name: EffectName, volume: number) {
     if (audioCtx.state === 'suspended') void audioCtx.resume()
     effectNodes.forEach((n) => { try { n.stop() } catch { /* already stopped */ } })
     effectNodes = []
+    if (name === 'whoosh') {
+      effectNodes.push(playWhoosh(audioCtx, volume))
+      return
+    }
     const t0 = audioCtx.currentTime + 0.01
     for (const [freq, start, dur] of NOTES[name]) {
       const osc = audioCtx.createOscillator()
