@@ -6,5 +6,7 @@ In short: be kind, be patient and assume good intent. Harassment, insults and pe
 aren't welcome anywhere in this project: issues, pull requests, discussions or anywhere else we
 meet as a community.
 
-To report unacceptable behaviour, email **team@visualout.com**. Every report is reviewed and kept
-private. The maintainers may remove comments, close threads, or block people who break this code.
+To report unacceptable behaviour, use GitHub's **Report content** option on the comment or issue,
+or contact the maintainer, [@nasihairfana](https://github.com/nasihairfana), privately. Every report
+is reviewed and kept private. The maintainer may remove comments, close threads, or block people who
+break this code.

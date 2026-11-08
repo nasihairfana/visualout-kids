@@ -6,10 +6,8 @@ child safety seriously.
 
 ## Reporting a problem
 
-Please **don't open a public issue** for a security or child-safety problem. Instead, either:
-
-- use GitHub's [private vulnerability reporting](https://github.com/nasihairfana/visualout-kids/security/advisories/new), or
-- email **team@visualout.com**.
+Please **don't open a public issue** for a security or child-safety problem. Instead, use GitHub's
+[private vulnerability reporting](https://github.com/nasihairfana/visualout-kids/security/advisories/new).
 
 Things we especially want to hear about:
 

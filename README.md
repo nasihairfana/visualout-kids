@@ -1,6 +1,6 @@
 # Visualout Kids
 
-Gentle, free learning games for toddlers, by [Visualout](https://www.visualout.com), at
+Gentle, free learning games for toddlers, made by [Nasiha Irfana](https://github.com/nasihairfana), at
 **[kids.visualout.com](https://kids.visualout.com)**. The first game is **My First ABC**, an A–Z
 alphabet game for children aged 2–3, at [`/abc`](https://kids.visualout.com/abc).
 
@@ -245,14 +245,14 @@ away from the game controls.
 ## Support the project
 
 Visualout Kids is free for every family: no ads, no purchases and no tracking, now and always.
-Development is funded by sponsors. If it helps your family or classroom, you can
-[sponsor it on GitHub](https://github.com/sponsors/nasihairfana).
+It's built by one independent developer, and sponsors cover its running costs. If it helps your
+family or classroom, you can [sponsor it on GitHub](https://github.com/sponsors/nasihairfana).
 
 Sponsorship pays for:
 
-- human voice recordings and original illustrations, replacing the placeholders (see [ASSETS.md](ASSETS.md))
-- new games, such as numbers and colours, and more languages
-- testing on real low-cost Android phones, and the hosting and domain
+- the AI coding and development tools used to build the games
+- new games for numbers, colours and shapes, and better voices and illustrations (see [ASSETS.md](ASSETS.md))
+- the hosting and domain that keep the app free to use
 
 Sponsoring is optional and unlocks nothing: every game stays free and complete for everyone.
 
@@ -262,11 +262,7 @@ Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBU
 [code of conduct](CODE_OF_CONDUCT.md). Please report security or child-safety problems privately,
 as described in [SECURITY.md](SECURITY.md).
 
-## Contact
-
-Visualout · [www.visualout.com](https://www.visualout.com) · [team@visualout.com](mailto:team@visualout.com)
-
 ## License
 
-[MIT](LICENSE) © 2026 Visualout. This covers the code, the placeholder illustrations and the
+[MIT](LICENSE) © 2026 Nasiha Irfana. This covers the code, the placeholder illustrations and the
 generated speech in this repository.
