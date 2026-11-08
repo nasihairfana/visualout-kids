@@ -1,6 +1,6 @@
 # Plan: Webbo's Letter City (3D letter game)
 
-**Status:** Proposal, for review. No code yet.
+**Status:** Milestones 1 and 2 built (playable with placeholder art). See "What was built" at the end.
 **For:** ages 2–3, as part of My First ABC.
 
 ## Why an original hero, not Spider-Man
@@ -92,6 +92,27 @@ with Find the letter and can be tested without WebGL.
 2. **Game:** rounds, voice and progress wired to `useChoiceActivity`; 2D fallback; reduced motion.
 3. **Polish:** final Webbo model and city, sounds, celebration.
 4. **Test with toddlers**, as in issue #5, then release.
+
+## What was built
+
+Playable at `/abc/web`, with a 5th card on the My First ABC home.
+
+| Planned | Built | Why it differs |
+|---|---|---|
+| three.js through TresJS | **Plain three.js** in `app/games/webbo/world.ts`, loaded on demand by `WebboScene.vue` | The scene is one hand-written animation loop; TresJS would add a dependency without saving code |
+| `.glb` models | **Shapes built in code** (spheres, tubes, boxes) | No art yet. Final models can replace `buildWebbo()` / `buildBuilding()` later |
+| 3D picking | **Invisible `<button>` per balloon**, kept over it each frame | Bigger tap targets, keyboard and screen-reader access, and easy to test |
+| Webbo swings to the balloon | **Webbo webs the balloon in** to its roof, then swings to the next roof between rounds | Easier to follow for a toddler: one clear "catch", then one clear "swing" |
+
+Size: three.js and the world are a separate ~140 KB (gzipped) file, so they load only on this page.
+
+Tested in headless Firefox with real mouse clicks: full 5-round games in portrait (375×812) and
+landscape (812×375), with WebGL off (2D fallback) and with reduced motion. All finish with "Great
+swinging!", progress is saved under mode `web`, and there are no content-security-policy violations
+or console errors. Tap targets measured 108–136 px.
+
+Not done yet: final Webbo and city art (milestone 3), recordings for the new phrases, testing on a
+real low-end Android phone (performance go / no-go) and with toddlers (milestone 4).
 
 ## Open questions
 

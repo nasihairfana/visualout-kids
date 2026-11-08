@@ -71,7 +71,27 @@ airplane mode, then relaunch it.
 | **Find the letter** | `/abc/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
 | **Match** | `/abc/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
 | **Write** | `/abc/write?letter=a` | Trace a big dotted capital with a finger. A glowing dot first shows how; a green start dot and arrow mark where each line begins. Each traced line snaps solid with a chime, and the finished letter pops in full colour with its picture and "You wrote A!". The eraser wipes it to try again, and the hand button shows how again. Starts at the first letter not yet written |
+| **Webbo** | `/abc/web` | Webbo's Letter City, in 3D. Webbo, a friendly spider, sits on a roof with three letter balloons floating over the street. "Catch the letter B!": tap the right balloon and Webbo webs it in, it pops into its picture, and Webbo swings on to the next roof. Same rules as Find the letter. Falls back to a flat version if the phone can't do 3D |
 | Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, content status, privacy notes, and who makes Visualout Kids |
+
+### Webbo's Letter City (3D)
+
+Webbo is an original Visualout character, **not** Spider-Man (Marvel/Disney): keep the art free of
+masks, suits, chest emblems and red-and-blue colouring. The design is in
+[docs/plans/webbo-letter-city.md](docs/plans/webbo-letter-city.md).
+
+- **Loaded only on `/abc/web`.** three.js (~140 KB gzipped) sits in its own file, so the other modes
+  don't download it. The service worker still caches it for offline play.
+- **Rules are shared.** `WebboGame.vue` uses `useChoiceActivity` exactly like Find the letter
+  (wait-then-look, calm pause, hint, adaptive difficulty, mode `web` in progress). The 3D world in
+  `app/games/webbo/world.ts` only draws and animates.
+- **Tapping.** Each balloon has a real, invisible `<button>` that the world keeps over it every frame:
+  at least 88 px, reachable by keyboard and screen readers, and no 3D hit-testing needed.
+- **Gentle.** The camera glides slowly after Webbo; reduced-motion settings remove the bobbing and
+  swinging. No timer, no way to lose.
+- **Light.** Low-poly shapes, no real-time shadows, pixel ratio capped at 2 and dropped to 1 if the
+  first few seconds run slowly. If WebGL isn't available, or the context is lost, `WebboFlat.vue`
+  plays the same game in 2D.
 
 ### Writing for small fingers
 
@@ -111,6 +131,7 @@ Match are built so that looking pays off and guessing doesn't (see `useChoiceAct
 app/
   types/learning.ts            Language-agnostic content model (AlphabetPack, AlphabetLetter, SpokenClip)
   data/english-alphabets.ts    English A–Z content, phrases, asset registration ← edit content here
+  games/webbo/world.ts         Webbo's 3D city (three.js): buildings, Webbo, balloons, camera, animations
   data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
@@ -124,6 +145,8 @@ app/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
                                LetterQuiz, LetterObjectMatch, ObjectIllustration,
                                AlphabetWrite, LetterTracer (tracing: checkpoints, crayon, show-me)
+    webbo/                     WebboGame (rules and controls), WebboScene (hosts the 3D world),
+                               WebboFlat (2D fallback), WebboIcon (flat Webbo)
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
     platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)

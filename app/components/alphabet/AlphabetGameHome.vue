@@ -2,7 +2,7 @@
 import { LETTER_STROKES, STROKE_BOX } from '~/data/letter-strokes'
 
 /**
- * Home: four big picture cards a non-reader can tell apart, plus sound toggle and a
+ * Home: five big picture cards a non-reader can tell apart, plus sound toggle and a
  * hold-to-open parent entry tucked in the corner.
  */
 const { effect, stop } = useAudio()
@@ -31,7 +31,7 @@ function open(path: string) {
       <SoundToggle />
     </header>
 
-    <main class="grid flex-1 grid-cols-2 content-center gap-3 sm:gap-5 landscape:grid-cols-4">
+    <main class="grid flex-1 grid-cols-2 content-center gap-3 sm:gap-5 landscape:grid-cols-5">
       <!-- Explore: the primary mode, biggest card -->
       <button
         type="button"
@@ -53,12 +53,12 @@ function open(path: string) {
         aria-label="Find the letter"
         @click="open('/abc/find')"
       >
-        <span class="flex items-center gap-1.5 text-3xl font-black sm:gap-2 sm:text-5xl" aria-hidden="true">
-          <span class="grid size-11 place-items-center rounded-xl bg-white/70 sm:size-16 sm:rounded-2xl">B</span>
-          <span class="grid size-11 place-items-center rounded-xl bg-white ring-4 ring-sunny sm:size-16 sm:rounded-2xl">A</span>
-          <span class="grid size-11 place-items-center rounded-xl bg-white/70 sm:size-16 sm:rounded-2xl">C</span>
+        <span class="flex items-center gap-1.5 text-3xl font-black sm:gap-2 sm:text-5xl landscape:!gap-1 landscape:!text-2xl" aria-hidden="true">
+          <span class="grid size-11 place-items-center rounded-xl bg-white/70 sm:size-16 sm:rounded-2xl landscape:!size-9 landscape:!rounded-lg">B</span>
+          <span class="grid size-11 place-items-center rounded-xl bg-white ring-4 ring-sunny sm:size-16 sm:rounded-2xl landscape:!size-9 landscape:!rounded-lg">A</span>
+          <span class="grid size-11 place-items-center rounded-xl bg-white/70 sm:size-16 sm:rounded-2xl landscape:!size-9 landscape:!rounded-lg">C</span>
         </span>
-        <span class="text-center text-xl font-black leading-tight sm:text-2xl">Find the letter</span>
+        <span class="text-center text-xl font-black leading-tight sm:text-2xl landscape:!text-xl">Find the letter</span>
       </button>
 
       <!-- Match letter to object -->
@@ -68,10 +68,10 @@ function open(path: string) {
         aria-label="Match letter to picture"
         @click="open('/abc/match')"
       >
-        <span class="flex items-center gap-1.5 sm:gap-3" aria-hidden="true">
-          <span class="text-5xl font-black sm:text-6xl">B</span>
-          <AppIcon name="next" class="size-6 sm:size-9" />
-          <span class="grid size-14 place-items-center rounded-2xl bg-white sm:size-20"><ObjectIllustration :letter="ball" size="xs" class="!size-10 !text-4xl sm:!size-14" /></span>
+        <span class="flex items-center gap-1.5 sm:gap-3 landscape:!gap-1" aria-hidden="true">
+          <span class="text-5xl font-black sm:text-6xl landscape:!text-4xl">B</span>
+          <AppIcon name="next" class="size-6 sm:size-9 landscape:!size-5" />
+          <span class="grid size-14 place-items-center rounded-2xl bg-white sm:size-20 landscape:!size-12"><ObjectIllustration :letter="ball" size="xs" class="!size-10 !text-4xl sm:!size-14 landscape:!size-9" /></span>
         </span>
         <span class="text-xl font-black sm:text-2xl">Match</span>
       </button>
@@ -79,18 +79,32 @@ function open(path: string) {
       <!-- Write: trace the letters -->
       <button
         type="button"
-        class="toy-press col-span-2 flex min-h-[17vh] items-center justify-center gap-4 rounded-blob bg-lilac p-3 text-lilac-ink landscape:col-span-1 landscape:min-h-[60vh] landscape:flex-col landscape:gap-2"
+        class="toy-press flex min-h-[18vh] flex-col items-center justify-center gap-1 rounded-blob bg-lilac p-3 text-lilac-ink landscape:min-h-[60vh] landscape:gap-2"
         aria-label="Write letters"
         @click="open('/abc/write')"
       >
         <span class="relative" aria-hidden="true">
-          <svg :viewBox="`0 0 ${STROKE_BOX.width} ${STROKE_BOX.height}`" class="h-[11vh] min-h-16 landscape:h-[20vh]" fill="none" stroke="currentColor" stroke-linecap="round">
+          <svg :viewBox="`0 0 ${STROKE_BOX.width} ${STROKE_BOX.height}`" class="h-[9vh] min-h-14 landscape:h-[18vh]" fill="none" stroke="currentColor" stroke-linecap="round">
             <path v-for="(d, i) in writeSample" :key="i" :d="d" stroke-width="6" stroke-dasharray="0.01 9" stroke-opacity="0.5" />
             <path :d="writeSample[0]" stroke-width="11" />
           </svg>
           <AppIcon name="pencil" class="absolute -bottom-1 -right-4 size-10 rotate-12 text-lilac-ink" />
         </span>
-        <span class="text-2xl font-black">Write</span>
+        <span class="text-xl font-black sm:text-2xl">Write</span>
+      </button>
+
+      <!-- Webbo's Letter City: catch letter balloons in 3D -->
+      <button
+        type="button"
+        class="toy-press relative flex min-h-[18vh] flex-col items-center justify-center gap-1 overflow-hidden rounded-blob bg-[#cfe7ff] p-3 text-sky-ink landscape:min-h-[60vh] landscape:gap-2"
+        aria-label="Webbo's Letter City"
+        @click="open('/abc/web')"
+      >
+        <span class="relative" aria-hidden="true">
+          <WebboIcon class="h-[9vh] min-h-14 landscape:h-[16vh]" />
+          <span class="absolute -right-5 -top-2 grid size-10 place-items-center rounded-[50%_50%_46%_46%] bg-[#FFD66B] text-xl font-black text-ink shadow sm:size-12 sm:text-2xl">B</span>
+        </span>
+        <span class="text-xl font-black sm:text-2xl">Webbo</span>
       </button>
     </main>
 

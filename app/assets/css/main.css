@@ -129,6 +129,19 @@
       max(env(safe-area-inset-bottom), 0.75rem) max(env(safe-area-inset-left), 1rem);
   }
 
+  /* Invisible tap target the 3D world keeps over each balloon in Webbo's Letter City. */
+  .webbo-hit {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 9999px;
+    background: transparent;
+    touch-action: manipulation;
+  }
+  .webbo-hit:disabled {
+    pointer-events: none;
+  }
+
   .emoji {
     font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
     line-height: 1;
