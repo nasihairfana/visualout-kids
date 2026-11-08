@@ -74,6 +74,11 @@ stays **off by default**, and a parent has to turn it on.
 
 ### Generated speech (`npm run audio`)
 
+`ffmpeg-static` (which the script uses to trim and encode clips) is an **optional** dependency. It
+downloads ffmpeg from GitHub during `npm install`, and the site's build must not fail when that
+download does, so a failed download is skipped. If `npm run audio` then can't find ffmpeg, run
+`npm rebuild ffmpeg-static` to try the download again.
+
 `scripts/generate-audio.mjs` voices every letter, word and phrase with
 [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M), an open (Apache-2.0) neural TTS model that runs
 on your machine. Nothing is sent online and the app itself never calls a TTS service. Voice
