@@ -1,0 +1,28 @@
+name: Bug report
+description: Something in a game doesn't work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you (or your child) do, and what went wrong?
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Which game and screen?
+      placeholder: e.g. My First ABC → Write, letter B
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: e.g. Samsung A14, Chrome, installed app
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I haven't included photos, videos or personal details of a child.
+          required: true

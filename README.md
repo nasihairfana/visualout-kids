@@ -242,6 +242,31 @@ away from the game controls.
 - Speech is generated, not yet human-recorded, and all illustrations are placeholders. See [ASSETS.md](ASSETS.md).
 - Usability testing with parents and children aged 2–3 is still to do.
 
+## Support the project
+
+Visualout Kids is free for every family: no ads, no purchases and no tracking, now and always.
+Development is funded by sponsors. If it helps your family or classroom, you can
+[sponsor it on GitHub](https://github.com/sponsors/nasihairfana).
+
+Sponsorship pays for:
+
+- human voice recordings and original illustrations, replacing the placeholders (see [ASSETS.md](ASSETS.md))
+- new games, such as numbers and colours, and more languages
+- testing on real low-cost Android phones, and the hosting and domain
+
+Sponsoring is optional and unlocks nothing: every game stays free and complete for everyone.
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[code of conduct](CODE_OF_CONDUCT.md). Please report security or child-safety problems privately,
+as described in [SECURITY.md](SECURITY.md).
+
+## Contact
+
+Visualout · [www.visualout.com](https://www.visualout.com) · [team@visualout.com](mailto:team@visualout.com)
+
 ## License
 
-Open source. Add the Visualout Kids license of choice (e.g. MIT for code, CC BY for artwork) before publishing.
+[MIT](LICENSE) © 2026 Visualout. This covers the code, the placeholder illustrations and the
+generated speech in this repository.
