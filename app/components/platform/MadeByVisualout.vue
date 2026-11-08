@@ -10,13 +10,19 @@ defineProps<{ dark?: boolean }>()
 
 <template>
   <div class="flex flex-col gap-4">
-    <p :class="dark ? 'text-cream/80' : 'text-ink-soft'">
-      {{ brand.studioAbout }} We make Visualout Kids free, with no ads and nothing to buy, as a gift to
-      families. If you like it, we'd love you to know who we are and what else we make.
-    </p>
+    <div class="flex flex-col gap-3" :class="dark ? 'text-cream/80' : 'text-ink-soft'">
+      <p>
+        We created Visualout Kids as a gift to families — free to use, with no ads, no tracking, and
+        nothing to buy.
+      </p>
+      <p>
+        We believe good software should be accessible to everyone. If you enjoy Visualout Kids, we'd love
+        you to discover more about us and what we're building.
+      </p>
+    </div>
 
     <p v-if="brand.products.length" class="-mb-2 text-xs font-bold uppercase tracking-[0.18em]" :class="dark ? 'text-cream/60' : 'text-ink-soft'">
-      Also from Visualout
+      More from Visualout
     </p>
     <ul v-if="brand.products.length" class="grid gap-3 sm:grid-cols-2">
       <li v-for="product in brand.products" :key="product.name">
@@ -40,7 +46,7 @@ defineProps<{ dark?: boolean }>()
         rel="noopener noreferrer"
         class="toy-press inline-flex min-h-14 items-center rounded-full px-6 font-black"
         :class="dark ? 'bg-sunny text-ink' : 'bg-ink text-cream'"
-      >Visit Visualout ↗</a>
+      >Explore Visualout ↗</a>
       <a
         :href="brand.sourceUrl"
         target="_blank"

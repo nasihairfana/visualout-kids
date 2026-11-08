@@ -70,7 +70,62 @@ airplane mode, then relaunch it.
 | **Explore** | `/abc/explore?letter=a` | Shows one big letter (upper and lower case), a picture and the word. Tapping the letter says it, and tapping the picture says the word. You can use the big arrows or swipe. The A–Z grid button is for grown-ups. Going past Z shows "Great exploring!" |
 | **Find the letter** | `/abc/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
 | **Match** | `/abc/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
+| **Write** | `/abc/write?letter=a` | Trace a big dotted capital with a finger. A glowing dot first shows how; a green start dot and arrow mark where each line begins. Each traced line snaps solid with a chime, and the finished letter pops in full colour with its picture and "You wrote A!". The eraser wipes it to try again, and the hand button shows how again. Starts at the first letter not yet written |
+| **Webbo** | `/abc/web` | Webbo's Letter City, in 3D. First, "Do it with me!": Webbo shows its web move (wiggle your fingers… and point! Whoosh!) and a big hand invites the child to copy it. Then the camera stands behind Webbo on a rooftop, looking out over the city; three buildings ahead carry big letter signs. "Catch the letter B!": tap the right building (or swipe a web from Webbo to it); Webbo wiggles, points, webs the sign and jumps over in one gentle arc, the sign pops into its picture, and Webbo dances. After five, a finale: fireworks and a parade of the pictures caught. `?view=side` shows the original side-on view with balloons. Falls back to a flat version if the phone can't do 3D |
 | Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, content status, privacy notes, and who makes Visualout Kids |
+
+### Webbo's Letter City (3D)
+
+Webbo is an original Visualout character, **not** Spider-Man (Marvel/Disney): keep the art free of
+masks, suits, chest emblems and red-and-blue colouring. The design is in
+[docs/plans/webbo-letter-city.md](docs/plans/webbo-letter-city.md).
+
+- **Loaded only on `/abc/web`.** three.js (~140 KB gzipped) sits in its own file, so the other modes
+  don't download it. The service worker still caches it for offline play.
+- **Rules are shared.** `WebboGame.vue` uses `useChoiceActivity` exactly like Find the letter
+  (wait-then-look, calm pause, hint, adaptive difficulty, mode `web` in progress). The 3D world only
+  draws and animates.
+- **Two views, one world.** `app/games/webbo/world.ts` (`WebboWorld`) holds everything shared: Webbo,
+  hands and move, celebrations, confetti, tap buttons, swiping, the finale and the frame loop, plus
+  the original side-on view. `rooftop.ts` (`RooftopWorld`, the default) only changes the city
+  layout, the targets (signs instead of balloons), the camera and the jump. Portrait uses a wider
+  lens and a zigzag of buildings so the three signs never overlap. The camera only ever glides
+  forward: no rolling, spinning or upside-down swings.
+- **Tapping.** Each balloon has a real, invisible `<button>` that the world keeps over it every frame:
+  at least 88 px, reachable by keyboard and screen readers, and no 3D hit-testing needed. Older kids
+  can also swipe from Webbo to a balloon to throw the web; letting go over a balloon picks it.
+- **Playing with Webbo.** Kids want to see Webbo's face and move him. In the rooftop view, a
+  sideways drag on Webbo turns him round; when he faces the child he waves, giggles and wiggles his
+  legs, and he springs back when let go. A tap makes him hop, wave and giggle (in every view, and
+  in the flat fallback). None of this is ever a pick, and it's off while he's jumping or dancing.
+  Swipe-to-throw is kept exactly as kids know it: any drag heading up from Webbo throws a web, and
+  a sideways drag that then heads up to a sign becomes a throw too. In the side view the balloons
+  sit beside Webbo, so there every drag is a throw and only tapping makes him react.
+- **Webbo's web move.** Two of Webbo's eight limbs are arms with mitten hands. Before every web it
+  wiggles its fingers (like the Itsy Bitsy Spider) and points: a move toddlers can copy with their own
+  hands. It's deliberately not Spider-Man's hand sign. The intro teaches it once per visit, and the
+  hand button shows it again. No camera is used: copying it is pretend play.
+- **Celebrations.** Every catch gets confetti and a dance with arms up; a first-try catch adds a spin
+  and a second burst. After five balloons, fireworks and a parade of the five pictures play before
+  the "Great swinging!" screen.
+- **Gentle.** The camera glides slowly after Webbo; reduced-motion settings remove the bobbing and
+  swinging. No timer, no way to lose.
+- **Light.** Low-poly shapes, no real-time shadows, pixel ratio capped at 2 and dropped to 1 if the
+  first few seconds run slowly. If WebGL isn't available, or the context is lost, `WebboFlat.vue`
+  plays the same game in 2D.
+
+### Writing for small fingers
+
+Write is tuned for 2- and 3-year-olds (see `LetterTracer.vue`):
+
+- **Wide path.** The finger only has to pass within about 13% of the letter's height of the line, and a
+  quick swipe still counts, because the points in between are checked too.
+- **Never wrong.** Scribbling off the line leaves crayon marks but no wiggle, buzzer or "try again".
+  Starting in the wrong place just pulses the green start dot.
+- **Lifting is fine.** Progress stays when the finger lifts, so a child can stop and carry on.
+- **Help when stuck.** After 7 seconds without progress, the glowing dot shows the current line again.
+- **Tuning.** `TOLERANCE`, `LOOKAHEAD` and `IDLE_MS` at the top of `LetterTracer.vue` are first guesses.
+  Adjust them after watching a toddler use it on a real phone.
 
 ### Looking, not guessing
 
@@ -97,6 +152,9 @@ Match are built so that looking pays off and guessing doesn't (see `useChoiceAct
 app/
   types/learning.ts            Language-agnostic content model (AlphabetPack, AlphabetLetter, SpokenClip)
   data/english-alphabets.ts    English A–Z content, phrases, asset registration ← edit content here
+  games/webbo/world.ts         Webbo's 3D world (three.js): Webbo, animations, celebrations; side-on view
+  games/webbo/rooftop.ts       Rooftop view (default): behind Webbo, letter signs on buildings ahead
+  data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
     useAudio.ts                Audio service: one speech channel, fallbacks, synthesized effects, music
@@ -107,7 +165,10 @@ app/
     useChoiceActivity.ts       Reusable "pick 1 of 3" engine: wait-then-look, calm pause, hints, no score
   components/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
-                               LetterQuiz, LetterObjectMatch, ObjectIllustration
+                               LetterQuiz, LetterObjectMatch, ObjectIllustration,
+                               AlphabetWrite, LetterTracer (tracing: checkpoints, crayon, show-me)
+    webbo/                     WebboGame (rules and controls), WebboScene (hosts the 3D world),
+                               WebboFlat (2D fallback), WebboIcon (flat Webbo)
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
     platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)

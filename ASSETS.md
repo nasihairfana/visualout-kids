@@ -16,6 +16,7 @@ that doesn't exist**: a path is only switched on once it is listed in
 | Background music (optional) | **Missing** | The toggle is disabled in Parent settings |
 | Illustrations (26) | **Placeholder SVGs** in `public/illustrations/` | Simple stand-in drawings. If a file fails to load, an emoji is shown instead |
 | Interaction sounds (tap, success, try-again, celebrate) | **Done** | Generated live with the Web Audio API, so no files are needed |
+| Webbo (3D model and flat icon) | **Placeholder**, built from simple shapes in `app/games/webbo/world.ts` and `WebboIcon.vue` | Works as is. Final art should keep Webbo an original character: no mask, suit, chest emblem or red-and-blue look |
 | App icons | Done (first pass) | `public/icons/icon.svg`. Re-run `npx pwa-assets-generator` after changing it |
 
 ## Audio
@@ -53,6 +54,12 @@ nest orange parrot queen rabbit sun tiger umbrella van watermelon xylophone yo-y
 | `great-exploring.mp3` | "Great exploring!" |
 | `great-finding.mp3` | "Great finding!" |
 | `great-matching.mp3` | "Great matching!" |
+| `lets-write-{id}.mp3` (26) | "Let's write A!" Said when a letter appears in Write |
+| `you-wrote-{id}.mp3` (26) | "You wrote A!" Said when the child finishes tracing it |
+| `great-writing.mp3` | "Great writing!" |
+| `catch-the-letter-{id}.mp3` (26) | "Catch the letter A!" Webbo's question |
+| `great-swinging.mp3` | "Great swinging!" After Webbo's fifth balloon |
+| `wiggle-and-point.mp3` | "Wiggle your fingers… and point! Whoosh!" Webbo's web move, said playfully so the child copies it |
 
 ### 4. Object sounds (optional): `public/audio/en/objects/{word-slug}.mp3`
 
@@ -66,6 +73,11 @@ Use a soft loop of 30 to 60 seconds with no lyrics. Set `backgroundMusic` in the
 stays **off by default**, and a parent has to turn it on.
 
 ### Generated speech (`npm run audio`)
+
+`ffmpeg-static` (which the script uses to trim and encode clips) is an **optional** dependency. It
+downloads ffmpeg from GitHub during `npm install`, and the site's build must not fail when that
+download does, so a failed download is skipped. If `npm run audio` then can't find ffmpeg, run
+`npm rebuild ffmpeg-static` to try the download again.
 
 `scripts/generate-audio.mjs` voices every letter, word and phrase with
 [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M), an open (Apache-2.0) neural TTS model that runs
