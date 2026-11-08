@@ -81,6 +81,11 @@ export interface AlphabetPack {
     greatExploring: SpokenPhrase
     greatFinding: SpokenPhrase
     greatMatching: SpokenPhrase
+    /** Said when a letter appears in the Write activity, e.g. "Let's write A!" */
+    letsWrite: (letter: AlphabetLetter) => SpokenPhrase
+    /** Said when the child finishes tracing a letter, e.g. "You wrote A!" */
+    youWrote: (letter: AlphabetLetter) => SpokenPhrase
+    greatWriting: SpokenPhrase
   }
   /** Optional looping background track. Off by default; `null` = not installed. */
   backgroundMusic: string | null

@@ -15,7 +15,6 @@ export interface BrandProduct {
 export const brand = {
   studio: 'Visualout',
   studioUrl: 'https://www.visualout.com/?ref=kids',
-  studioAbout: 'Visualout is a software company that has been building products people rely on since 2015.',
   siteUrl: 'https://kids.visualout.com',
   sourceUrl: 'https://github.com/nasihairfana/visualout-kids',
   contactEmail: 'team@visualout.com',

@@ -53,6 +53,9 @@ nest orange parrot queen rabbit sun tiger umbrella van watermelon xylophone yo-y
 | `great-exploring.mp3` | "Great exploring!" |
 | `great-finding.mp3` | "Great finding!" |
 | `great-matching.mp3` | "Great matching!" |
+| `lets-write-{id}.mp3` (26) | "Let's write A!" Said when a letter appears in Write |
+| `you-wrote-{id}.mp3` (26) | "You wrote A!" Said when the child finishes tracing it |
+| `great-writing.mp3` | "Great writing!" |
 
 ### 4. Object sounds (optional): `public/audio/en/objects/{word-slug}.mp3`
 

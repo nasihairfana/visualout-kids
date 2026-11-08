@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Parent area: sound, voice, progress reset and privacy notes. No links out, no accounts. */
 const { settings, reset: resetSettings } = useSoundSettings()
-const { exploredCount, letterStatus, levelOf, reset: resetProgress } = useGameProgress()
+const { exploredCount, writtenSet, letterStatus, levelOf, reset: resetProgress } = useGameProgress()
 const { letters, pack } = useAlphabetGame()
 const { say, effect, deviceVoiceSupported } = useAudio()
 
@@ -98,6 +98,7 @@ function clearProgress() {
       <ul class="mb-4 space-y-1 text-sm text-ink-soft">
         <li><span class="mr-1 inline-block size-3 rounded bg-mint" /> Recognised · <span class="mr-1 inline-block size-3 rounded bg-butter" /> Practising · <span class="mr-1 inline-block size-3 rounded border border-ink-soft/30 bg-cream" /> Not tried yet</li>
         <li>Find the letter now uses: <b class="text-ink">{{ LEVEL_NAMES[levelOf('find')] }}</b>. It moves up or down on its own.</li>
+        <li>Letters written in Write: <b class="text-ink">{{ writtenSet.size }} / {{ letters.length }}</b></li>
         <li>Starting sounds recognised in Match: <b class="text-ink">{{ knownCount('match') }} / {{ letters.length }}</b></li>
       </ul>
 

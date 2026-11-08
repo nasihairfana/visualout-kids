@@ -15,6 +15,8 @@ export type LetterStatus = 'new' | 'practising' | 'known'
 interface ProgressState {
   explored: string[]
   lastLetter: string | null
+  /** Letters the child has traced all the way through in Write. */
+  written: string[]
   /** Last few first-try outcomes per letter, per activity (true = right first time). */
   firstTry: Record<PracticeMode, Record<string, boolean[]>>
   /** Recent first-try outcomes per activity, used to adapt difficulty. */
@@ -36,6 +38,7 @@ const LEVEL_DOWN_RATE = 0.4
 const empty = (): ProgressState => ({
   explored: [],
   lastLetter: null,
+  written: [],
   firstTry: { find: {}, match: {} },
   recent: { find: [], match: [] },
   level: { find: 0, match: 0 },
@@ -81,6 +84,12 @@ export function useGameProgress() {
     if (!exploredSet.value.has(id)) state.value.explored = [...state.value.explored, id]
   }
 
+  const writtenSet = computed(() => new Set(state.value.written))
+
+  function markWritten(id: string) {
+    if (!writtenSet.value.has(id)) state.value.written = [...state.value.written, id]
+  }
+
   /** Remember one solved round, and nudge the difficulty up or down when the trend is clear. */
   function recordRound(mode: PracticeMode, letterId: string, firstTry: boolean) {
     const perLetter = state.value.firstTry[mode]
@@ -118,6 +127,8 @@ export function useGameProgress() {
     exploredCount: computed(() => state.value.explored.length),
     lastLetter: computed(() => state.value.lastLetter),
     markExplored,
+    writtenSet,
+    markWritten,
     levelOf: (mode: PracticeMode) => state.value.level[mode],
     recordRound,
     letterStatus,
