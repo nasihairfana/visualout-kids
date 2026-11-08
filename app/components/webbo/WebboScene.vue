@@ -4,7 +4,8 @@ import type { Celebration } from '~/composables/useChoiceActivity'
 import type { Insets, WebboWorld, WorldLetter } from '~/games/webbo/world'
 
 /**
- * Hosts the 3D city. three.js is imported here on demand, so it's only downloaded on /abc/web.
+ * Hosts the 3D city (rooftop view, or the side view with `?view=side`). three.js is imported here
+ * on demand, so it's only downloaded on /abc/web.
  * Emits `unsupported` if the device can't draw it, so the game can switch to the flat version.
  */
 const props = defineProps<{
@@ -41,11 +42,14 @@ const toWorld = (round: Round): WorldLetter[] => round.choices.map(l => ({
 const pushState = () => world?.setState({ waiting: props.waiting, calming: props.calming, hint: props.showHint })
 
 onMounted(async () => {
+  // Rooftop view by default; `?view=side` keeps the original side-on view for comparison.
+  const side = useRoute().query.view === 'side'
   const { WebboWorld, supportsWebGL } = await import('~/games/webbo/world')
+  const World = side ? WebboWorld : (await import('~/games/webbo/rooftop')).RooftopWorld
   if (!canvas.value || !hitLayer.value) return
   if (!supportsWebGL()) return emit('unsupported')
   try {
-    world = new WebboWorld({
+    world = new World({
       canvas: canvas.value,
       hitLayer: hitLayer.value,
       onPick: id => emit('pick', id),
@@ -57,6 +61,8 @@ onMounted(async () => {
     return emit('unsupported')
   }
   canvas.value.addEventListener('webglcontextlost', () => emit('unsupported'), { once: true })
+  // Local development only: lets the world be inspected from the browser console.
+  if (import.meta.dev) (window as unknown as { __webbo?: unknown }).__webbo = world
   world.setInsets(props.insets)
   world.setRound(toWorld(props.round), props.round.target.id)
   pushState()

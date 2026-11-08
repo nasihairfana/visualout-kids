@@ -71,7 +71,7 @@ airplane mode, then relaunch it.
 | **Find the letter** | `/abc/find` | Asks "Where is A?", shows an A in a frame, and offers 3 big letters. All cards are plain white, so the twin can only be found by its shape, not its colour. There's no score, timer or red. Each session is 5 rounds and ends with a celebration |
 | **Match** | `/abc/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
 | **Write** | `/abc/write?letter=a` | Trace a big dotted capital with a finger. A glowing dot first shows how; a green start dot and arrow mark where each line begins. Each traced line snaps solid with a chime, and the finished letter pops in full colour with its picture and "You wrote A!". The eraser wipes it to try again, and the hand button shows how again. Starts at the first letter not yet written |
-| **Webbo** | `/abc/web` | Webbo's Letter City, in 3D. First, "Do it with me!": Webbo shows its web move (wiggle your fingers… and point! Whoosh!) and a big hand invites the child to copy it. Then Webbo sits on a roof with three letter balloons over the street. "Catch the letter B!": tap the right balloon (or swipe a web from Webbo to it); Webbo wiggles, points, webs it in, it pops into its picture, and Webbo dances. After five, a finale: fireworks and a parade of the pictures caught. Falls back to a flat version if the phone can't do 3D |
+| **Webbo** | `/abc/web` | Webbo's Letter City, in 3D. First, "Do it with me!": Webbo shows its web move (wiggle your fingers… and point! Whoosh!) and a big hand invites the child to copy it. Then the camera stands behind Webbo on a rooftop, looking out over the city; three buildings ahead carry big letter signs. "Jump to the letter B!": tap the right building (or swipe a web from Webbo to it); Webbo wiggles, points, webs the sign and jumps over in one gentle arc, the sign pops into its picture, and Webbo dances. After five, a finale: fireworks and a parade of the pictures caught. `?view=side` shows the original side-on view with balloons. Falls back to a flat version if the phone can't do 3D |
 | Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, content status, privacy notes, and who makes Visualout Kids |
 
 ### Webbo's Letter City (3D)
@@ -83,8 +83,14 @@ masks, suits, chest emblems and red-and-blue colouring. The design is in
 - **Loaded only on `/abc/web`.** three.js (~140 KB gzipped) sits in its own file, so the other modes
   don't download it. The service worker still caches it for offline play.
 - **Rules are shared.** `WebboGame.vue` uses `useChoiceActivity` exactly like Find the letter
-  (wait-then-look, calm pause, hint, adaptive difficulty, mode `web` in progress). The 3D world in
-  `app/games/webbo/world.ts` only draws and animates.
+  (wait-then-look, calm pause, hint, adaptive difficulty, mode `web` in progress). The 3D world only
+  draws and animates.
+- **Two views, one world.** `app/games/webbo/world.ts` (`WebboWorld`) holds everything shared: Webbo,
+  hands and move, celebrations, confetti, tap buttons, swiping, the finale and the frame loop, plus
+  the original side-on view. `rooftop.ts` (`RooftopWorld`, the default) only changes the city
+  layout, the targets (signs instead of balloons), the camera and the jump. Portrait uses a wider
+  lens and a zigzag of buildings so the three signs never overlap. The camera only ever glides
+  forward: no rolling, spinning or upside-down swings.
 - **Tapping.** Each balloon has a real, invisible `<button>` that the world keeps over it every frame:
   at least 88 px, reachable by keyboard and screen readers, and no 3D hit-testing needed. Older kids
   can also swipe from Webbo to a balloon to throw the web; letting go over a balloon picks it.
@@ -139,7 +145,8 @@ Match are built so that looking pays off and guessing doesn't (see `useChoiceAct
 app/
   types/learning.ts            Language-agnostic content model (AlphabetPack, AlphabetLetter, SpokenClip)
   data/english-alphabets.ts    English A–Z content, phrases, asset registration ← edit content here
-  games/webbo/world.ts         Webbo's 3D city (three.js): buildings, Webbo, balloons, camera, animations
+  games/webbo/world.ts         Webbo's 3D world (three.js): Webbo, animations, celebrations; side-on view
+  games/webbo/rooftop.ts       Rooftop view (default): behind Webbo, letter signs on buildings ahead
   data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/

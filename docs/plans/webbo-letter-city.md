@@ -116,6 +116,15 @@ Added after a child's feedback ("where are the spider's hands?"):
   and a second burst. After five balloons, fireworks and a parade of the five pictures play before
   "Great swinging!".
 
+**Rooftop view (now the default).** Inspired by the over-the-shoulder rooftop shots common in
+city-swinging games (the camera idea only; Webbo and the city stay our own): the camera stands
+behind Webbo on a roof, looking out over a pastel city. Three nearby buildings carry big letter
+signs; picking one makes Webbo web its sign and jump over in one gentle arc. Toddler rules: letters
+only on the three nearest buildings, signs drawn bigger with distance so they look the same size,
+and a camera that only glides forward (no roll, spin or upside-down swing). Portrait uses a wider
+lens and a zigzag staircase of buildings so the signs never overlap. The original side-on view
+remains at `/abc/web?view=side`.
+
 Size: three.js and the world are a separate ~140 KB (gzipped) file, so they load only on this page.
 
 Tested in headless Firefox with real mouse clicks: full 5-round games in portrait (375×812) and

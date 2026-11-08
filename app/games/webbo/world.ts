@@ -40,13 +40,13 @@ export interface WorldOptions {
   reducedMotion: boolean
 }
 
-const SPAN = 10
+export const SPAN = 10
 const HEIGHTS = [6, 7.5, 5.5, 8, 6.5, 7, 5.8]
-const FOV = 40
-const BALLOON_R = 1.15
-const MIN_HIT_PX = 88
+export const FOV = 40
+export const BALLOON_R = 1.15
+export const MIN_HIT_PX = 88
 
-const COLORS = {
+export const COLORS = {
   ink: 0x2b2240,
   webbo: 0x8e7cf0,
   webboDark: 0x5b47c9,
@@ -60,7 +60,7 @@ const FONT = '900 200px ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", 
 
 // ---- small helpers --------------------------------------------------------------------------
 
-const ease = {
+export const ease = {
   out: (t: number) => 1 - (1 - t) ** 3,
   inOut: (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2),
   back: (t: number) => 1 + 2.2 * (t - 1) ** 3 + 1.2 * (t - 1) ** 2,
@@ -68,7 +68,7 @@ const ease = {
 
 interface Tween { start: number, duration: number, update: (p: number) => void, done?: () => void }
 
-function canvasTexture(width: number, height: number, draw: (ctx: CanvasRenderingContext2D) => void) {
+export function canvasTexture(width: number, height: number, draw: (ctx: CanvasRenderingContext2D) => void) {
   const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = height
@@ -79,15 +79,15 @@ function canvasTexture(width: number, height: number, draw: (ctx: CanvasRenderin
   return texture
 }
 
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath()
   ctx.roundRect(x, y, w, h, r)
 }
 
 /** Index into a list that also works for negative numbers (buildings behind the start). */
-const pick = <T>(list: readonly T[], index: number) => list[((index % list.length) + list.length) % list.length]!
+export const pick = <T>(list: readonly T[], index: number) => list[((index % list.length) + list.length) % list.length]!
 
-const hex = (color: number) => `#${color.toString(16).padStart(6, '0')}`
+export const hex = (color: number) => `#${color.toString(16).padStart(6, '0')}`
 
 /** A thin cylinder between two points: used for every strand of web. */
 function makeStrand() {
@@ -98,7 +98,7 @@ function makeStrand() {
 }
 
 const UP = new THREE.Vector3(0, 1, 0)
-function setStrand(strand: THREE.Mesh, from: THREE.Vector3, to: THREE.Vector3) {
+export function setStrand(strand: THREE.Mesh, from: THREE.Vector3, to: THREE.Vector3) {
   const dir = to.clone().sub(from)
   const length = dir.length()
   strand.visible = length > 0.01
@@ -230,7 +230,7 @@ function buildArm(side: number, skin: THREE.Material, dark: THREE.Material): Arm
 
 interface Building { index: number, height: number, mesh: THREE.Mesh }
 
-function windowTexture(color: number, height: number) {
+export function windowTexture(color: number, height: number) {
   const rows = Math.round(height * 1.1)
   return canvasTexture(128, rows * 48, (ctx) => {
     ctx.fillStyle = hex(color)
@@ -261,7 +261,7 @@ function buildBuilding(index: number): Building {
 
 // ---- balloons ---------------------------------------------------------------------------------
 
-interface Balloon {
+export interface Balloon {
   letter: WorldLetter
   group: THREE.Group
   skin: THREE.Mesh
@@ -270,12 +270,14 @@ interface Balloon {
   home: THREE.Vector3
   phase: number
   wiggleStart: number
+  /** Drawn this many times bigger (the rooftop view's far signs), 1 for balloons. */
+  size: number
   /** Leaving (caught or floating away): no longer tappable, ignores bobbing. */
   leaving: boolean
   button: HTMLButtonElement
 }
 
-function letterTexture(label: string) {
+export function letterTexture(label: string) {
   return canvasTexture(256, 256, (ctx) => {
     ctx.font = FONT
     ctx.textAlign = 'center'
@@ -290,7 +292,7 @@ function letterTexture(label: string) {
 }
 
 let haloTexture: THREE.Texture | null = null
-function glowTexture() {
+export function glowTexture() {
   haloTexture ??= canvasTexture(128, 128, (ctx) => {
     const g = ctx.createRadialGradient(64, 64, 20, 64, 64, 64)
     g.addColorStop(0, 'rgba(255,201,77,0.95)')
@@ -302,7 +304,7 @@ function glowTexture() {
 }
 
 /** A white rounded card with the letter's picture, drawn once the image has loaded. */
-function pictureCard(letter: WorldLetter) {
+export function pictureCard(letter: WorldLetter) {
   const material = new THREE.MeshBasicMaterial({ transparent: true })
   const paint = (image: HTMLImageElement | null) => {
     material.map?.dispose()
@@ -338,50 +340,52 @@ function pictureCard(letter: WorldLetter) {
 // ---- the world --------------------------------------------------------------------------------
 
 export class WebboWorld {
-  private renderer: THREE.WebGLRenderer
-  private scene = new THREE.Scene()
-  private camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200)
-  private lastFrame = performance.now()
-  private frame = 0
-  private tweens: Tween[] = []
-  private now = 0
+  protected renderer: THREE.WebGLRenderer
+  protected scene = new THREE.Scene()
+  protected camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 200)
+  protected lastFrame = performance.now()
+  protected frame = 0
+  protected tweens: Tween[] = []
+  protected now = 0
 
-  private webbo = buildWebbo()
-  private webStrand = makeStrand()
-  private buildings = new Map<number, Building>()
-  private balloons: Balloon[] = []
-  private pictures: THREE.Mesh[] = []
-  private confetti: Array<{ mesh: THREE.Mesh, velocity: THREE.Vector3, life: number }> = []
-  private clouds = new THREE.Group()
+  protected webbo = buildWebbo()
+  protected webStrand = makeStrand()
+  protected buildings = new Map<number, Building>()
+  protected balloons: Balloon[] = []
+  protected pictures: THREE.Mesh[] = []
+  protected confetti: Array<{ mesh: THREE.Mesh, velocity: THREE.Vector3, life: number }> = []
+  protected clouds = new THREE.Group()
   /** Ground and hills: moved along with the camera, so the city can go on for ever. */
-  private backdrop = new THREE.Group()
+  protected backdrop = new THREE.Group()
 
   /** What each arm is doing: hanging, waving above the head, or pointing at a spot in the world. */
-  private armPose: Array<{ pose: 'rest' | 'up' | 'point', at?: THREE.Vector3 }> = [{ pose: 'rest' }, { pose: 'rest' }]
+  protected armPose: Array<{ pose: 'rest' | 'up' | 'point', at?: THREE.Vector3 }> = [{ pose: 'rest' }, { pose: 'rest' }]
   /** What the fingers are doing: still, wiggling (like spider legs), or pointing. */
-  private fingers: 'still' | 'wiggle' | 'point' = 'still'
+  protected fingers: 'still' | 'wiggle' | 'point' = 'still'
   /** Letters caught since the last finale, for the picture parade. */
-  private session: WorldLetter[] = []
-  private parade: THREE.Mesh[] = []
-  private swipe: { pointerId: number } | null = null
+  protected session: WorldLetter[] = []
+  protected parade: THREE.Mesh[] = []
+  protected swipe: { pointerId: number } | null = null
 
   /** Which roof Webbo is on. */
-  private perch = 0
-  private started = false
-  private moving = false
-  private state: WorldState = { waiting: false, calming: false, hint: false }
-  private targetId: string | null = null
-  private insets: Insets = { top: 0, right: 0, bottom: 0, left: 0 }
-  private portrait = false
+  protected perch = 0
+  protected started = false
+  protected moving = false
+  protected state: WorldState = { waiting: false, calming: false, hint: false }
+  protected targetId: string | null = null
+  protected insets: Insets = { top: 0, right: 0, bottom: 0, left: 0 }
+  protected portrait = false
   /** The roof point the camera frames; it travels with Webbo during a swing. */
-  private focus = new THREE.Vector3()
-  private cameraGoal = new THREE.Vector3()
-  private lookGoal = new THREE.Vector3()
-  private look = new THREE.Vector3()
-  private slowFrames = 0
-  private frames = 0
+  protected focus = new THREE.Vector3()
+  protected cameraGoal = new THREE.Vector3()
+  protected lookGoal = new THREE.Vector3()
+  protected look = new THREE.Vector3()
+  protected slowFrames = 0
+  protected frames = 0
+  /** How far balloons bob up and down. */
+  protected bobAmount = 0.18
 
-  constructor(private opts: WorldOptions) {
+  constructor(protected opts: WorldOptions) {
     this.renderer = new THREE.WebGLRenderer({ canvas: opts.canvas, antialias: true, powerPreference: 'low-power' })
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.buildScenery()
@@ -503,9 +507,10 @@ export class WebboWorld {
     }
     // Lay the row out in the free part of the screen, just under the game's top controls.
     const rect = this.opts.canvas.getBoundingClientRect()
-    const top = this.toWorld(rect.left + rect.width / 2, rect.top + this.insets.top + 70, 2.4)
-    const left = this.toWorld(rect.left + this.insets.left + 50, rect.top + rect.height / 2, 2.4).x
-    const right = this.toWorld(rect.right - this.insets.right - 50, rect.top + rect.height / 2, 2.4).x
+    const z = this.paradePlaneZ()
+    const top = this.toWorld(rect.left + rect.width / 2, rect.top + this.insets.top + 70, z)
+    const left = this.toWorld(rect.left + this.insets.left + 50, rect.top + rect.height / 2, z).x
+    const right = this.toWorld(rect.right - this.insets.right - 50, rect.top + rect.height / 2, z).x
     const count = Math.max(1, letters.length)
     const spacing = Math.min(2.6, (right - left) / Math.max(1, count - 1))
     const scale = Math.min(0.95, spacing / 2.5)
@@ -514,7 +519,7 @@ export class WebboWorld {
     letters.forEach((letter, i) => {
       const card = pictureCard(letter)
       const from = this.webbo.position.clone().add(new THREE.Vector3(0, 0.8, 0.6))
-      const to = new THREE.Vector3(look.x + (i - (letters.length - 1) / 2) * spacing, rowY + (i % 2) * 0.35, 2.4)
+      const to = new THREE.Vector3(look.x + (i - (letters.length - 1) / 2) * spacing, rowY + (i % 2) * 0.35, z)
       card.position.copy(from)
       card.scale.setScalar(0.01)
       this.scene.add(card)
@@ -526,11 +531,16 @@ export class WebboWorld {
     })
     // Fireworks: bursts of confetti across the sky.
     for (let i = 0; i < 6; i++) {
-      const at = new THREE.Vector3(look.x + (i - 2.5) * spacing * 0.9, rowY - 1.5 - (i % 3) * 1.1, 0.5)
+      const at = new THREE.Vector3(look.x + (i - 2.5) * spacing * 0.9, rowY - 1.5 - (i % 3) * 1.1, z - 2)
       this.tween(0, () => this.burst(at, i % 2 ? COLORS.balloons : [0xffc94d, 0xffffff, 0xff8a6b]), undefined, 0.2 + i * 0.32)
     }
     this.dance(2.6, true)
     return quick ? 0.6 : 2.6
+  }
+
+  /** The plane the finale's picture row sits on, in front of everything else. */
+  protected paradePlaneZ() {
+    return 2.4
   }
 
   /** Space taken by the game's controls, in CSS pixels. */
@@ -549,11 +559,20 @@ export class WebboWorld {
     const portrait = width / height < 0.9
     if (portrait !== this.portrait && this.started) {
       this.portrait = portrait
-      // Re-lay out the floating balloons for the new shape.
-      this.balloons.forEach((b, i) => { if (!b.leaving) b.home.copy(this.balloonSpot(i)) })
+      this.relayout()
     }
     this.portrait = portrait
     this.frameCamera(true)
+  }
+
+  /** The screen changed between portrait and landscape: move the targets to suit. */
+  protected relayout() {
+    this.balloons.forEach((b, i) => { if (!b.leaving) b.home.copy(this.balloonSpot(i)) })
+  }
+
+  /** The vertical plane (z) a swiped web is drawn to and the finale's pictures line up on. */
+  protected targetPlaneZ() {
+    return 1.4
   }
 
   dispose() {
@@ -574,7 +593,7 @@ export class WebboWorld {
 
   // ---- scenery ----------------------------------------------------------------------------------
 
-  private buildScenery() {
+  protected buildScenery() {
     this.scene.background = canvasTexture(4, 256, (ctx) => {
       const g = ctx.createLinearGradient(0, 0, 0, 256)
       g.addColorStop(0, '#a9d6ff')
@@ -617,7 +636,7 @@ export class WebboWorld {
   }
 
   /** Build the roofs around Webbo and drop the ones (and their pictures) far behind. */
-  private ensureBuildings() {
+  protected ensureBuildings() {
     for (let i = this.perch - 2; i <= this.perch + 3; i++) {
       if (this.buildings.has(i)) continue
       const building = buildBuilding(i)
@@ -636,7 +655,7 @@ export class WebboWorld {
     }
   }
 
-  private disposeObject(object: THREE.Object3D) {
+  protected disposeObject(object: THREE.Object3D) {
     this.scene.remove(object)
     object.traverse((o) => {
       const mesh = o as THREE.Mesh
@@ -649,15 +668,15 @@ export class WebboWorld {
     })
   }
 
-  private roofOf(index: number) {
+  protected roofOf(index: number) {
     return this.buildings.get(index)?.height ?? pick(HEIGHTS, index)
   }
 
-  private perchPoint(index: number) {
+  protected perchPoint(index: number) {
     return new THREE.Vector3(index * SPAN, this.roofOf(index) + 0.72, 0.4)
   }
 
-  private placeWebbo(index: number) {
+  protected placeWebbo(index: number) {
     this.perch = index
     this.webbo.position.copy(this.perchPoint(index))
     this.focus.copy(this.webbo.position)
@@ -667,7 +686,7 @@ export class WebboWorld {
   // ---- balloons -------------------------------------------------------------------------------
 
   /** Where the i-th balloon floats, relative to Webbo's roof. Portrait stacks them up a column. */
-  private balloonSpot(i: number) {
+  protected balloonSpot(i: number) {
     const base = this.perchPoint(this.perch)
     const spots: Array<[x: number, y: number]> = this.portrait
       ? [[5.3, 2.3], [3.4, 5.1], [5.5, 7.9]]
@@ -676,7 +695,7 @@ export class WebboWorld {
     return new THREE.Vector3(base.x + x, base.y + y, 1.4)
   }
 
-  private spawnBalloons(choices: WorldLetter[], delay: number) {
+  protected spawnBalloons(choices: WorldLetter[], delay: number) {
     choices.forEach((letter, i) => {
       const group = new THREE.Group()
       const color = pick(COLORS.balloons, this.perch * 2 + i)
@@ -711,15 +730,9 @@ export class WebboWorld {
       group.scale.setScalar(0.01)
       this.scene.add(group)
 
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.className = 'webbo-hit'
-      button.setAttribute('aria-label', `Letter ${letter.label}`)
-      button.dataset.letter = letter.id
-      button.addEventListener('click', () => this.opts.onPick(letter.id))
-      this.opts.hitLayer.appendChild(button)
+      const button = this.createHitButton(letter)
 
-      const balloon: Balloon = { letter, group, skin, label, halo, home, phase: i * 2.1, wiggleStart: -10, leaving: true, button }
+      const balloon: Balloon = { letter, group, skin, label, halo, home, phase: i * 2.1, wiggleStart: -10, leaving: true, button, size: 1 }
       this.balloons.push(balloon)
 
       // Rise up from the street and become tappable.
@@ -730,7 +743,19 @@ export class WebboWorld {
     })
   }
 
-  private floatAway(balloon: Balloon) {
+  /** The invisible button the world keeps over a balloon (or sign) so it can be tapped. */
+  protected createHitButton(letter: WorldLetter) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'webbo-hit'
+    button.setAttribute('aria-label', `Letter ${letter.label}`)
+    button.dataset.letter = letter.id
+    button.addEventListener('click', () => this.opts.onPick(letter.id))
+    this.opts.hitLayer.appendChild(button)
+    return button
+  }
+
+  protected floatAway(balloon: Balloon) {
     balloon.leaving = true
     const from = balloon.group.position.clone()
     this.tween(this.opts.reducedMotion ? 0 : 1.1, (p) => {
@@ -739,7 +764,7 @@ export class WebboWorld {
     }, () => this.removeBalloon(balloon))
   }
 
-  private removeBalloon(balloon: Balloon) {
+  protected removeBalloon(balloon: Balloon) {
     balloon.button.remove()
     this.scene.remove(balloon.group)
     // Everything but the shared glow texture belongs to this balloon alone.
@@ -753,11 +778,11 @@ export class WebboWorld {
     this.balloons = this.balloons.filter(b => b !== balloon)
   }
 
-  private clearBalloons() {
+  protected clearBalloons() {
     for (const balloon of [...this.balloons]) this.removeBalloon(balloon)
   }
 
-  private setOpacity(balloon: Balloon, opacity: number) {
+  protected setOpacity(balloon: Balloon, opacity: number) {
     (balloon.skin.material as THREE.MeshLambertMaterial).opacity = opacity
     ;(balloon.label.material as THREE.MeshBasicMaterial).opacity = opacity
   }
@@ -765,7 +790,7 @@ export class WebboWorld {
   // ---- moving on ----------------------------------------------------------------------------
 
   /** Stick caught pictures onto the front of the building they were caught at. */
-  private pinPictures() {
+  protected pinPictures() {
     for (const card of this.pictures) {
       if (card.userData.pinned) continue
       card.userData.pinned = true
@@ -783,7 +808,7 @@ export class WebboWorld {
   }
 
   /** Web up to the sky and swing across to the next roof. Returns how long it takes. */
-  private swingToNextRoof() {
+  protected swingToNextRoof() {
     const from = this.webbo.position.clone()
     const next = this.perch + 1
     this.perch = next
@@ -828,23 +853,23 @@ export class WebboWorld {
 
   // ---- Webbo's hands --------------------------------------------------------------------------
 
-  private get arms() {
+  protected get arms() {
     return this.webbo.userData.arms as Arm[]
   }
 
   /** Where webs come from: the pointing fingertip of Webbo's right hand. */
-  private tipPosition() {
+  protected tipPosition() {
     this.webbo.updateMatrixWorld(true)
     return this.arms[1]!.tip.getWorldPosition(new THREE.Vector3())
   }
 
-  private restArms() {
+  protected restArms() {
     this.armPose = [{ pose: 'rest' }, { pose: 'rest' }]
     this.fingers = 'still'
   }
 
   /** Raise the right hand towards `at`, wiggle the fingers, then point and whoosh. */
-  private wiggleAndPoint(at: THREE.Vector3, wiggleFor: number, then: () => void) {
+  protected wiggleAndPoint(at: THREE.Vector3, wiggleFor: number, then: () => void) {
     this.armPose[1] = { pose: 'point', at: at.clone() }
     if (this.opts.reducedMotion) {
       this.fingers = 'point'
@@ -861,7 +886,7 @@ export class WebboWorld {
   }
 
   /** A happy dance: arms up and waving, a hop, and (for a big one) a spin. */
-  private dance(duration: number, spin: boolean) {
+  protected dance(duration: number, spin: boolean) {
     this.armPose = [{ pose: 'up' }, { pose: 'up' }]
     this.fingers = 'still'
     if (this.opts.reducedMotion) {
@@ -881,7 +906,7 @@ export class WebboWorld {
   }
 
   /** Move arms and fingers a little towards their pose each frame. */
-  private animateArms(dt: number, t: number) {
+  protected animateArms(dt: number, t: number) {
     const k = Math.min(1, dt * 12)
     const inverse = this.webbo.quaternion.clone().invert()
     const goal = new THREE.Quaternion()
@@ -911,7 +936,7 @@ export class WebboWorld {
 
   // ---- swiping a web from Webbo to a balloon ---------------------------------------------------
 
-  private onSwipeStart = (e: PointerEvent) => {
+  protected onSwipeStart = (e: PointerEvent) => {
     if (e.target !== this.opts.hitLayer || this.swipe) return
     const webbo = this.toScreen(this.webbo.position)
     const reach = Math.max(70, this.screenSize(1.6, this.webbo.position))
@@ -922,9 +947,9 @@ export class WebboWorld {
     this.onSwipeMove(e)
   }
 
-  private onSwipeMove = (e: PointerEvent) => {
+  protected onSwipeMove = (e: PointerEvent) => {
     if (!this.swipe || e.pointerId !== this.swipe.pointerId) return
-    const at = this.toWorld(e.clientX, e.clientY, 1.4)
+    const at = this.toWorld(e.clientX, e.clientY, this.targetPlaneZ())
     this.armPose[1] = { pose: 'point', at }
     setStrand(this.webStrand, this.tipPosition(), at)
   }
@@ -933,7 +958,7 @@ export class WebboWorld {
    * Letting go over a balloon picks it, like letting go of a web. (Picking on the way would catch
    * whichever balloon the finger crossed first, not the one the child was aiming for.)
    */
-  private onSwipeEnd = (e: PointerEvent) => {
+  protected onSwipeEnd = (e: PointerEvent) => {
     if (!this.swipe || e.pointerId !== this.swipe.pointerId) return
     const aimed = this.balloons.find((b) => {
       if (b.leaving) return false
@@ -947,7 +972,7 @@ export class WebboWorld {
     }
   }
 
-  private endSwipe = () => {
+  protected endSwipe = () => {
     if (!this.swipe) return
     try { this.opts.hitLayer.releasePointerCapture(this.swipe.pointerId) }
     catch { /* already released */ }
@@ -957,20 +982,20 @@ export class WebboWorld {
   }
 
   /** Screen position (CSS pixels, relative to the page) of a point in the world. */
-  private toScreen(point: THREE.Vector3) {
+  protected toScreen(point: THREE.Vector3) {
     const rect = this.opts.canvas.getBoundingClientRect()
     const p = point.clone().project(this.camera)
     return { x: rect.left + (p.x * 0.5 + 0.5) * rect.width, y: rect.top + (-p.y * 0.5 + 0.5) * rect.height }
   }
 
   /** How many pixels tall something `size` units tall looks at `point`. */
-  private screenSize(size: number, point: THREE.Vector3) {
-    const tan = Math.tan(THREE.MathUtils.degToRad(FOV / 2))
+  protected screenSize(size: number, point: THREE.Vector3) {
+    const tan = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2))
     return (size / (2 * this.camera.position.distanceTo(point) * tan)) * this.opts.canvas.clientHeight
   }
 
   /** The world point under a screen position, on the plane z = `z`. */
-  private toWorld(clientX: number, clientY: number, z: number) {
+  protected toWorld(clientX: number, clientY: number, z: number) {
     const rect = this.opts.canvas.getBoundingClientRect()
     const ndc = new THREE.Vector3(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1, 0.5)
     const dir = ndc.unproject(this.camera).sub(this.camera.position).normalize()
@@ -978,13 +1003,19 @@ export class WebboWorld {
     return this.camera.position.clone().addScaledVector(dir, distance)
   }
 
-  private webboHop(height: number) {
+  /** Hills drift by slower than the city (a little depth); clouds wrap around as they drift. */
+  protected moveScenery(t: number, still: boolean) {
+    this.backdrop.position.x = this.camera.position.x * 0.7
+    this.clouds.position.x = this.camera.position.x * 0.8 + (still ? 0 : (t * 0.25) % 14)
+  }
+
+  protected webboHop(height: number) {
     if (this.opts.reducedMotion) return
     const body = this.webbo.userData.body as THREE.Group
     this.tween(0.5, (p) => { body.position.y = Math.sin(p * Math.PI) * height })
   }
 
-  private burst(at: THREE.Vector3, colors: number[]) {
+  protected burst(at: THREE.Vector3, colors: number[]) {
     if (this.opts.reducedMotion) return
     for (let i = 0; i < 22; i++) {
       const mesh = new THREE.Mesh(
@@ -1002,7 +1033,7 @@ export class WebboWorld {
   // ---- camera ---------------------------------------------------------------------------------
 
   /** Frame Webbo's roof and the balloons, inside the area not covered by the game's controls. */
-  private frameCamera(snap: boolean) {
+  protected frameCamera(snap: boolean) {
     const canvas = this.opts.canvas
     const W = canvas.clientWidth || 1
     const H = canvas.clientHeight || 1
@@ -1034,7 +1065,7 @@ export class WebboWorld {
   // ---- frame loop -----------------------------------------------------------------------------
 
   /** Jump every running animation to its end (e.g. Next tapped while a balloon is still popping). */
-  private finishTweens() {
+  protected finishTweens() {
     for (let guard = 0; this.tweens.length && guard < 20; guard++) {
       for (const tween of this.tweens.splice(0)) {
         tween.update(1)
@@ -1043,11 +1074,11 @@ export class WebboWorld {
     }
   }
 
-  private tween(duration: number, update: (p: number) => void, done?: () => void, delay = 0) {
+  protected tween(duration: number, update: (p: number) => void, done?: () => void, delay = 0) {
     this.tweens.push({ start: this.now + delay, duration, update, done })
   }
 
-  private onVisibility = () => {
+  protected onVisibility = () => {
     if (document.hidden) {
       cancelAnimationFrame(this.frame)
     }
@@ -1057,7 +1088,7 @@ export class WebboWorld {
     }
   }
 
-  private loop() {
+  protected loop() {
     this.frame = requestAnimationFrame(this.loop)
     const time = performance.now()
     const dt = Math.min((time - this.lastFrame) / 1000, 0.1)
@@ -1085,9 +1116,7 @@ export class WebboWorld {
       body.scale.set(1, 1 + Math.sin(t * 2.2) * 0.025, 1)
       for (const leg of legs) leg.rotation.x = Math.sin(t * (this.moving ? 9 : 2) + leg.userData.phase) * (this.moving ? 0.25 : 0.06)
     }
-    // Hills drift by slower than the city (a little depth); clouds wrap around as they drift.
-    this.backdrop.position.x = this.camera.position.x * 0.7
-    this.clouds.position.x = this.camera.position.x * 0.8 + (still ? 0 : (t * 0.25) % 14)
+    this.moveScenery(t, still)
     eyes.scale.y = (t % 4.2) > 4.05 ? 0.15 : 1
     this.animateArms(dt, still ? 0 : t)
 
@@ -1095,7 +1124,7 @@ export class WebboWorld {
     const dim = this.state.calming ? 0.35 : this.state.waiting ? 0.6 : 1
     for (const b of this.balloons) {
       if (!b.leaving) {
-        const bob = still ? 0 : Math.sin(t * 1.3 + b.phase) * 0.18
+        const bob = still ? 0 : Math.sin(t * 1.3 + b.phase) * this.bobAmount
         b.group.position.set(b.home.x, b.home.y + bob, b.home.z)
         const current = (b.skin.material as THREE.MeshLambertMaterial).opacity
         this.setOpacity(b, current + (dim - current) * Math.min(1, dt * 8))
@@ -1104,8 +1133,8 @@ export class WebboWorld {
         const hinted = this.state.hint && !this.state.waiting && b.letter.id === this.targetId
         b.halo.visible = hinted
         if (hinted) b.halo.scale.setScalar(1 + Math.sin(t * 4) * 0.12)
-        const calmScale = this.state.calming ? 0.92 : 1
-        b.group.scale.setScalar(b.group.scale.x + (calmScale - b.group.scale.x) * Math.min(1, dt * 8))
+        const goal = (this.state.calming ? 0.92 : 1) * b.size
+        b.group.scale.setScalar(b.group.scale.x + (goal - b.group.scale.x) * Math.min(1, dt * 8))
       }
     }
 
@@ -1138,21 +1167,21 @@ export class WebboWorld {
   }
 
   /** Keep each balloon's button over the balloon on screen, at least MIN_HIT_PX big. */
-  private placeButtons() {
+  protected placeButtons() {
     const H = this.opts.canvas.clientHeight
     const W = this.opts.canvas.clientWidth
     // Where Webbo is on screen (the start of a swipe), for tests and debugging.
     const webbo = this.toScreen(this.webbo.position)
     const where = `${Math.round(webbo.x)},${Math.round(webbo.y)}`
     if (this.opts.hitLayer.dataset.webbo !== where) this.opts.hitLayer.dataset.webbo = where
-    const tan = Math.tan(THREE.MathUtils.degToRad(FOV / 2))
+    const tan = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2))
     const point = new THREE.Vector3()
     for (const b of this.balloons) {
       point.copy(b.group.position).project(this.camera)
       const x = (point.x * 0.5 + 0.5) * W
       const y = (-point.y * 0.5 + 0.5) * H
       const depth = this.camera.position.distanceTo(b.group.position)
-      const diameter = (BALLOON_R * 2.3 / (2 * depth * tan)) * H
+      const diameter = (BALLOON_R * 2.3 * b.size / (2 * depth * tan)) * H
       const size = Math.max(MIN_HIT_PX, diameter * 1.25)
       const style = b.button.style
       style.width = style.height = `${size}px`
@@ -1162,7 +1191,7 @@ export class WebboWorld {
   }
 
   /** If the phone struggles, drop to a lighter resolution rather than stutter. */
-  private watchSpeed(dt: number) {
+  protected watchSpeed(dt: number) {
     if (this.frames > 240) return
     this.frames++
     if (dt > 0.045) this.slowFrames++
