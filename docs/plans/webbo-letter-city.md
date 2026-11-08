@@ -125,6 +125,12 @@ and a camera that only glides forward (no roll, spin or upside-down swing). Port
 lens and a zigzag staircase of buildings so the signs never overlap. The original side-on view
 remains at `/abc/web?view=side`.
 
+**Playing with Webbo** (after kids wanted to turn him to see his face): in the rooftop view a
+sideways drag turns him; facing the child he waves and giggles, and springs back on release. A tap
+makes him hop and wave in every view. It never counts as a pick. Swipe-to-throw (a favourite) wins
+every tie: upward drags always throw, a sideways drag that heads up becomes a throw, and the side
+view keeps every drag a throw.
+
 Size: three.js and the world are a separate ~140 KB (gzipped) file, so they load only on this page.
 
 Tested in headless Firefox with real mouse clicks: full 5-round games in portrait (375×812) and

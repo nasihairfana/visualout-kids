@@ -258,7 +258,8 @@ export class RooftopWorld extends WebboWorld {
   /** Put Webbo on a roof, looking out over the city (back to the camera, turned a little). */
   protected stand(roof: Roof) {
     this.webbo.position.copy(this.standPoint(roof))
-    this.webbo.rotation.set(0, Math.PI - 0.5, 0)
+    this.restTurn = Math.PI - 0.5
+    this.webbo.rotation.set(0, this.restTurn, 0)
     this.focus.copy(this.webbo.position)
   }
 
@@ -334,6 +335,11 @@ export class RooftopWorld extends WebboWorld {
       this.tween(this.opts.reducedMotion ? 0 : 0.45, p => group.scale.setScalar(Math.max(0.01, size * ease.back(p))), () => { sign.leaving = false }, delay + 0.45 + i * 0.12)
     })
     this.fillAround(base.x, base.z - STAND_Z, clear)
+  }
+
+  /** The signs are always ahead and above Webbo, so a sideways drag can't be meant as a throw. */
+  protected override canTurnByDrag() {
+    return true
   }
 
   /** Turning the phone mid-round keeps the same buildings; the next round uses the new layout. */

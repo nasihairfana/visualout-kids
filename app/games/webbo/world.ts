@@ -36,7 +36,7 @@ export interface WorldOptions {
   hitLayer: HTMLElement
   onPick: (id: string) => void
   /** Play a short effect (the world has no audio of its own). */
-  onSound?: (name: 'wiggle' | 'whoosh') => void
+  onSound?: (name: 'wiggle' | 'whoosh' | 'giggle') => void
   reducedMotion: boolean
 }
 
@@ -365,7 +365,19 @@ export class WebboWorld {
   /** Letters caught since the last finale, for the picture parade. */
   protected session: WorldLetter[] = []
   protected parade: THREE.Mesh[] = []
-  protected swipe: { pointerId: number } | null = null
+  /**
+   * A finger that went down on Webbo. It stays 'pending' until it has moved a little; then it's
+   * a 'throw' (towards the targets: the swipe-to-throw kids love) or a 'turn' (sideways: spin
+   * Webbo round to see his face). Lifting a 'pending' finger was a tap on Webbo.
+   */
+  protected swipe: { pointerId: number, x: number, y: number, mode: 'pending' | 'throw' | 'turn', startTurn: number, greeted: boolean } | null = null
+  /** Which way Webbo faces when nobody is holding him (radians about y). */
+  protected restTurn = 0.25
+  /** Where a child is turning Webbo to, or null to let him settle back to `restTurn`. */
+  protected turnGoal: number | null = null
+  protected dancing = false
+  /** Until when Webbo's legs wiggle as if tickled. */
+  protected tickledUntil = 0
 
   /** Which roof Webbo is on. */
   protected perch = 0
@@ -680,7 +692,8 @@ export class WebboWorld {
     this.perch = index
     this.webbo.position.copy(this.perchPoint(index))
     this.focus.copy(this.webbo.position)
-    this.webbo.rotation.set(0, 0.25, 0)
+    this.restTurn = 0.25
+    this.webbo.rotation.set(0, this.restTurn, 0)
   }
 
   // ---- balloons -------------------------------------------------------------------------------
@@ -887,10 +900,15 @@ export class WebboWorld {
 
   /** A happy dance: arms up and waving, a hop, and (for a big one) a spin. */
   protected dance(duration: number, spin: boolean) {
+    this.endSwipe()
+    this.dancing = true
     this.armPose = [{ pose: 'up' }, { pose: 'up' }]
     this.fingers = 'still'
     if (this.opts.reducedMotion) {
-      this.tween(duration, () => {}, () => this.restArms())
+      this.tween(duration, () => {}, () => {
+        this.dancing = false
+        this.restArms()
+      })
       return
     }
     const body = this.webbo.userData.body as THREE.Group
@@ -901,8 +919,23 @@ export class WebboWorld {
     }, () => {
       body.position.y = 0
       this.webbo.rotation.y = turn
+      this.dancing = false
       this.restArms()
     })
+  }
+
+  /** Turn Webbo towards where the child is turning him (or back to rest), at a gentle, capped speed. */
+  protected settleTurn(dt: number) {
+    if (this.moving || this.dancing) return
+    const goal = this.turnGoal ?? this.restTurn
+    const diff = goal - this.webbo.rotation.y
+    if (Math.abs(diff) < 0.001) return
+    if (this.opts.reducedMotion) {
+      this.webbo.rotation.y = goal
+      return
+    }
+    const step = Math.sign(diff) * Math.min(Math.abs(diff) * Math.min(1, dt * 10), 7 * dt)
+    this.webbo.rotation.y += step
   }
 
   /** Move arms and fingers a little towards their pose each frame. */
@@ -936,19 +969,41 @@ export class WebboWorld {
 
   // ---- swiping a web from Webbo to a balloon ---------------------------------------------------
 
+  /** Whether a sideways drag on Webbo turns him (only where it can't be mistaken for a throw). */
+  protected canTurnByDrag() {
+    return false
+  }
+
   protected onSwipeStart = (e: PointerEvent) => {
     if (e.target !== this.opts.hitLayer || this.swipe) return
     const webbo = this.toScreen(this.webbo.position)
     const reach = Math.max(70, this.screenSize(1.6, this.webbo.position))
     if (Math.hypot(e.clientX - webbo.x, e.clientY - webbo.y) > reach) return
-    this.swipe = { pointerId: e.pointerId }
+    this.swipe = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, mode: 'pending', startTurn: this.webbo.rotation.y, greeted: false }
     this.opts.hitLayer.setPointerCapture(e.pointerId)
-    this.fingers = 'point'
-    this.onSwipeMove(e)
   }
 
   protected onSwipeMove = (e: PointerEvent) => {
-    if (!this.swipe || e.pointerId !== this.swipe.pointerId) return
+    const swipe = this.swipe
+    if (!swipe || e.pointerId !== swipe.pointerId) return
+    const dx = e.clientX - swipe.x
+    const dy = e.clientY - swipe.y
+    if (swipe.mode === 'pending') {
+      if (Math.hypot(dx, dy) < 16) return
+      // Anything heading upwards is a throw; only a clearly sideways drag turns Webbo.
+      const upwards = dy < -0.5 * Math.abs(dx)
+      swipe.mode = !upwards && this.canTurnByDrag() && this.canTurn() ? 'turn' : 'throw'
+    }
+    // A turn that then heads clearly up towards the targets becomes a throw after all.
+    if (swipe.mode === 'turn' && dy < -60 && -dy > Math.abs(dx) * 0.8) {
+      swipe.mode = 'throw'
+      this.turnGoal = null
+    }
+    if (swipe.mode === 'turn') {
+      this.turnWebbo(swipe, dx)
+      return
+    }
+    this.fingers = 'point'
     const at = this.toWorld(e.clientX, e.clientY, this.targetPlaneZ())
     this.armPose[1] = { pose: 'point', at }
     setStrand(this.webStrand, this.tipPosition(), at)
@@ -957,18 +1012,24 @@ export class WebboWorld {
   /**
    * Letting go over a balloon picks it, like letting go of a web. (Picking on the way would catch
    * whichever balloon the finger crossed first, not the one the child was aiming for.)
+   * A finger that never really moved was a tap on Webbo: he reacts, but nothing is picked.
    */
   protected onSwipeEnd = (e: PointerEvent) => {
-    if (!this.swipe || e.pointerId !== this.swipe.pointerId) return
-    const aimed = this.balloons.find((b) => {
+    const swipe = this.swipe
+    if (!swipe || e.pointerId !== swipe.pointerId) return
+    const aimed = swipe.mode === 'throw' && this.balloons.find((b) => {
       if (b.leaving) return false
       const box = b.button.getBoundingClientRect()
       return e.clientX >= box.left && e.clientX <= box.right && e.clientY >= box.top && e.clientY <= box.bottom
     })
+    const tapped = swipe.mode === 'pending'
     this.endSwipe()
     if (aimed) {
       this.opts.onSound?.('whoosh')
       this.opts.onPick(aimed.letter.id)
+    }
+    else if (tapped && this.canTurn()) {
+      this.greet(true)
     }
   }
 
@@ -976,9 +1037,47 @@ export class WebboWorld {
     if (!this.swipe) return
     try { this.opts.hitLayer.releasePointerCapture(this.swipe.pointerId) }
     catch { /* already released */ }
+    const threw = this.swipe.mode === 'throw'
     this.swipe = null
-    this.webStrand.visible = false
-    this.restArms()
+    this.turnGoal = null
+    // Only a throw moved the arms; a turn's wave finishes on its own.
+    if (threw) {
+      this.webStrand.visible = false
+      this.restArms()
+    }
+  }
+
+  // ---- playing with Webbo (never part of the game's scoring) -----------------------------------
+
+  /** Webbo can be played with except while he's jumping, swinging or dancing. */
+  protected canTurn() {
+    return !this.moving && !this.dancing
+  }
+
+  /** The way Webbo faces when he looks straight at the child (towards the camera). */
+  protected faceCameraTurn() {
+    return Math.atan2(this.camera.position.x - this.webbo.position.x, this.camera.position.z - this.webbo.position.z)
+  }
+
+  /** Follow the finger round; when he ends up facing the child, he says hello. */
+  protected turnWebbo(swipe: NonNullable<WebboWorld['swipe']>, dx: number) {
+    const face = this.faceCameraTurn()
+    // Reduced motion: no following the finger, he simply turns to face the child.
+    this.turnGoal = this.opts.reducedMotion ? face : swipe.startTurn + dx * 0.014
+    const off = Math.atan2(Math.sin(this.webbo.rotation.y - face), Math.cos(this.webbo.rotation.y - face))
+    if (!swipe.greeted && Math.abs(off) < 0.5) {
+      swipe.greeted = true
+      this.greet(false)
+    }
+  }
+
+  /** A wave, a giggle and a little leg wiggle (and a hop, for a tap). */
+  protected greet(hop: boolean) {
+    this.opts.onSound?.('giggle')
+    this.tickledUntil = this.now + 0.7
+    this.armPose[0] = { pose: 'up' }
+    this.tween(1, () => {}, () => { if (!this.dancing) this.armPose[0] = { pose: 'rest' } })
+    if (hop) this.webboHop(0.35)
   }
 
   /** Screen position (CSS pixels, relative to the page) of a point in the world. */
@@ -1114,11 +1213,13 @@ export class WebboWorld {
     const { body, eyes, legs } = this.webbo.userData as { body: THREE.Group, eyes: THREE.Group, legs: THREE.Mesh[] }
     if (!still) {
       body.scale.set(1, 1 + Math.sin(t * 2.2) * 0.025, 1)
-      for (const leg of legs) leg.rotation.x = Math.sin(t * (this.moving ? 9 : 2) + leg.userData.phase) * (this.moving ? 0.25 : 0.06)
+      const busy = this.moving || t < this.tickledUntil
+      for (const leg of legs) leg.rotation.x = Math.sin(t * (busy ? 9 : 2) + leg.userData.phase) * (busy ? 0.25 : 0.06)
     }
     this.moveScenery(t, still)
     eyes.scale.y = (t % 4.2) > 4.05 ? 0.15 : 1
     this.animateArms(dt, still ? 0 : t)
+    this.settleTurn(dt)
 
     // Balloons bob, dim while the question is asked, wobble when wrong, glow as a hint.
     const dim = this.state.calming ? 0.35 : this.state.waiting ? 0.6 : 1

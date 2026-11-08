@@ -19,7 +19,7 @@ import type { SpokenClip } from '~/types/learning'
  */
 
 
-export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'stroke' | 'tryAgain' | 'celebrate' | 'wiggle' | 'whoosh'
+export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'stroke' | 'tryAgain' | 'celebrate' | 'wiggle' | 'whoosh' | 'giggle'
 
 // ---- module singletons (client only) ---------------------------------------------------
 
@@ -156,6 +156,8 @@ const NOTES: Record<EffectName, Array<[freq: number, start: number, dur: number]
   stroke: [[784, 0, 0.08], [1047, 0.07, 0.14]],
   // Webbo wiggling its fingers: a quick, light trill.
   wiggle: [[880, 0, 0.06], [988, 0.07, 0.06], [880, 0.14, 0.06], [988, 0.21, 0.06], [1175, 0.28, 0.08]],
+  // Webbo being tickled: a bouncy, rising giggle.
+  giggle: [[880, 0, 0.05], [1175, 0.06, 0.05], [988, 0.12, 0.05], [1319, 0.18, 0.05], [1175, 0.24, 0.05], [1568, 0.3, 0.1]],
   // Played as a noise sweep, not notes (see `playWhoosh`).
   whoosh: [],
   // Deliberately warm and "rising" — an invitation, never a buzzer.

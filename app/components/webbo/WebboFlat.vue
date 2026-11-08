@@ -37,6 +37,15 @@ watch(() => props.finished, (finished) => {
 })
 onBeforeUnmount(() => clearTimeout(moveTimer))
 
+// Tapping Webbo: he waves and giggles. Just for fun, never a pick.
+const { effect } = useAudio()
+const greeting = ref(false)
+function greet() {
+  effect('giggle')
+  greeting.value = true
+  setTimeout(() => { greeting.value = false }, 900)
+}
+
 const BALLOONS = ['bg-[#FFB59A]', 'bg-[#9CC8F5]', 'bg-[#9AD9B8]']
 const OFFSETS = ['landscape:translate-y-6', 'landscape:-translate-y-6', 'landscape:translate-y-4']
 </script>
@@ -46,13 +55,15 @@ const OFFSETS = ['landscape:translate-y-6', 'landscape:-translate-y-6', 'landsca
     <!-- Webbo on a roof -->
     <!-- In a narrow portrait screen Webbo sits in the corner, out of the balloons' way. -->
     <div class="absolute bottom-0 left-3 flex shrink-0 flex-col items-center sm:static landscape:static">
-      <WebboIcon
-        :happy="solved"
-        :pose="move === 'up' ? 'up' : move === 'rest' ? 'rest' : 'point'"
-        :wiggle="move === 'wiggle'"
-        class="w-[11vh] max-w-36 sm:w-[18vh]"
-        :class="solved && 'animate-bounce-soft'"
-      />
+      <button type="button" class="rounded-full" aria-label="Say hello to Webbo" data-webbo-flat @click="greet">
+        <WebboIcon
+          :happy="solved || greeting"
+          :pose="move === 'up' || greeting ? 'up' : move === 'rest' ? 'rest' : 'point'"
+          :wiggle="move === 'wiggle' || greeting"
+          class="w-[11vh] max-w-36 sm:w-[18vh]"
+          :class="(solved || greeting) && 'animate-bounce-soft'"
+        />
+      </button>
       <div class="h-[7vh] w-[14vh] max-w-44 rounded-t-2xl bg-lilac sm:h-[14vh] sm:w-[22vh]" />
     </div>
 

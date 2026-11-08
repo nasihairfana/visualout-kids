@@ -94,6 +94,13 @@ masks, suits, chest emblems and red-and-blue colouring. The design is in
 - **Tapping.** Each balloon has a real, invisible `<button>` that the world keeps over it every frame:
   at least 88 px, reachable by keyboard and screen readers, and no 3D hit-testing needed. Older kids
   can also swipe from Webbo to a balloon to throw the web; letting go over a balloon picks it.
+- **Playing with Webbo.** Kids want to see Webbo's face and move him. In the rooftop view, a
+  sideways drag on Webbo turns him round; when he faces the child he waves, giggles and wiggles his
+  legs, and he springs back when let go. A tap makes him hop, wave and giggle (in every view, and
+  in the flat fallback). None of this is ever a pick, and it's off while he's jumping or dancing.
+  Swipe-to-throw is kept exactly as kids know it: any drag heading up from Webbo throws a web, and
+  a sideways drag that then heads up to a sign becomes a throw too. In the side view the balloons
+  sit beside Webbo, so there every drag is a throw and only tapping makes him react.
 - **Webbo's web move.** Two of Webbo's eight limbs are arms with mitten hands. Before every web it
   wiggles its fingers (like the Itsy Bitsy Spider) and points: a move toddlers can copy with their own
   hands. It's deliberately not Spider-Man's hand sign. The intro teaches it once per visit, and the
