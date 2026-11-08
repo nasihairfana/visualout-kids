@@ -35,6 +35,8 @@ export interface WorldOptions {
   /** Element the balloon buttons are added to; it should overlay the canvas exactly. */
   hitLayer: HTMLElement
   onPick: (id: string) => void
+  /** Play a short effect (the world has no audio of its own). */
+  onSound?: (name: 'wiggle' | 'whoosh') => void
   reducedMotion: boolean
 }
 
@@ -148,10 +150,10 @@ function buildWebbo() {
   smile.rotation.z = Math.PI
   body.add(smile)
 
-  // Eight bendy legs, four a side, as tubes along gentle curves.
+  // Six bendy legs, three a side, as tubes along gentle curves. The front two limbs are arms.
   const legs: THREE.Mesh[] = []
   for (const side of [-1, 1]) {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 1; i < 4; i++) {
       const z = 0.3 - i * 0.32
       const curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(side * 0.5, -0.1, z),
@@ -165,8 +167,63 @@ function buildWebbo() {
     }
   }
 
-  group.userData = { body, eyes, legs }
+  const arms = [-1, 1].map(side => buildArm(side, purple, dark))
+  for (const arm of arms) body.add(arm.group)
+
+  group.userData = { body, eyes, legs, arms }
   return group
+}
+
+/** Arm angle (about z) with the hand hanging down and out at Webbo's side. */
+const restAngle = (side: number) => -side * 2.35
+const Y_AXIS = new THREE.Vector3(0, 1, 0)
+
+interface Arm {
+  side: number
+  /** Pivots at the shoulder; the arm points along its local +Y. */
+  group: THREE.Group
+  fingers: THREE.Group[]
+  /** The tip of the pointing finger, where webs come from. */
+  tip: THREE.Object3D
+}
+
+/** An arm with a round mitten hand and four short fingers, for Webbo's "wiggle and point" move. */
+function buildArm(side: number, skin: THREE.Material, dark: THREE.Material): Arm {
+  const group = new THREE.Group()
+  group.position.set(side * 0.6, -0.05, 0.38)
+  group.rotation.z = restAngle(side)
+  const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.56, 8), dark)
+  upper.position.y = 0.28
+  group.add(upper)
+
+  const hand = new THREE.Group()
+  hand.position.y = 0.62
+  group.add(hand)
+  const palm = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), skin)
+  palm.scale.set(1, 0.9, 0.7)
+  hand.add(palm)
+  const thumb = new THREE.Mesh(new THREE.SphereGeometry(0.065, 10, 8), skin)
+  thumb.position.set(-side * 0.15, 0.04, 0.05)
+  hand.add(thumb)
+
+  const fingers: THREE.Group[] = []
+  let tip = new THREE.Object3D()
+  ;[-0.1, -0.035, 0.035, 0.1].forEach((x, i) => {
+    const finger = new THREE.Group()
+    finger.position.set(x * -side, 0.12, 0)
+    const bone = new THREE.Mesh(new THREE.CapsuleGeometry(0.038, 0.12, 4, 8), skin)
+    bone.position.y = 0.09
+    finger.add(bone)
+    finger.userData.phase = i * 0.9
+    hand.add(finger)
+    fingers.push(finger)
+    if (i === 0) {
+      tip = new THREE.Object3D()
+      tip.position.y = 0.2
+      finger.add(tip)
+    }
+  })
+  return { side, group, fingers, tip }
 }
 
 // ---- city -------------------------------------------------------------------------------------
@@ -299,6 +356,15 @@ export class WebboWorld {
   /** Ground and hills: moved along with the camera, so the city can go on for ever. */
   private backdrop = new THREE.Group()
 
+  /** What each arm is doing: hanging, waving above the head, or pointing at a spot in the world. */
+  private armPose: Array<{ pose: 'rest' | 'up' | 'point', at?: THREE.Vector3 }> = [{ pose: 'rest' }, { pose: 'rest' }]
+  /** What the fingers are doing: still, wiggling (like spider legs), or pointing. */
+  private fingers: 'still' | 'wiggle' | 'point' = 'still'
+  /** Letters caught since the last finale, for the picture parade. */
+  private session: WorldLetter[] = []
+  private parade: THREE.Mesh[] = []
+  private swipe: { pointerId: number } | null = null
+
   /** Which roof Webbo is on. */
   private perch = 0
   private started = false
@@ -324,6 +390,11 @@ export class WebboWorld {
     this.loop = this.loop.bind(this)
     this.frame = requestAnimationFrame(this.loop)
     document.addEventListener('visibilitychange', this.onVisibility)
+    const layer = opts.hitLayer
+    layer.addEventListener('pointerdown', this.onSwipeStart)
+    layer.addEventListener('pointermove', this.onSwipeMove)
+    layer.addEventListener('pointerup', this.onSwipeEnd)
+    layer.addEventListener('pointercancel', this.endSwipe)
   }
 
   // ---- public API (called by WebboScene.vue) --------------------------------------------------
@@ -332,6 +403,9 @@ export class WebboWorld {
   setRound(choices: WorldLetter[], targetId: string) {
     this.targetId = targetId
     this.finishTweens()
+    for (const card of this.parade) this.disposeObject(card)
+    this.parade = []
+    this.restArms()
     const first = !this.started
     this.started = true
     this.clearBalloons()
@@ -363,22 +437,26 @@ export class WebboWorld {
     this.webboHop(0.25)
   }
 
-  /** The right balloon was picked: web it in and pop it into its picture. */
-  catch(id: string) {
+  /**
+   * The right balloon was picked: wiggle-and-point, web it in, pop it into its picture, and
+   * celebrate ('big' = found without the hint: a dance and a bigger burst).
+   */
+  catch(id: string, celebration: 'big' | 'gentle' = 'big') {
     const balloon = this.balloons.find(b => b.letter.id === id && !b.leaving)
     if (!balloon) return
     balloon.leaving = true
+    this.session.push(balloon.letter)
     for (const other of this.balloons) {
       if (other !== balloon) this.floatAway(other)
     }
 
-    const hand = () => this.webbo.position.clone().add(new THREE.Vector3(0.55, 0.15, 0.4))
+    const hand = () => this.tipPosition()
     const from = balloon.group.position.clone()
     const popAt = this.webbo.position.clone().add(new THREE.Vector3(1.9, 1.7, 0.9))
     const quick = this.opts.reducedMotion
 
-    // 1. Shoot the web.
-    this.tween(quick ? 0 : 0.22, (p) => {
+    // 1. Wiggle, point, and shoot the web.
+    this.wiggleAndPoint(balloon.group.position, celebration === 'big' ? 0.5 : 0.3, () => this.tween(quick ? 0 : 0.22, (p) => {
       setStrand(this.webStrand, hand(), hand().lerp(balloon.group.position, p))
     }, () => {
       // 2. Pull the balloon in on the web.
@@ -396,9 +474,63 @@ export class WebboWorld {
         this.scene.add(card)
         this.pictures.push(card)
         this.tween(quick ? 0 : 0.5, p => card.scale.setScalar(Math.max(0.01, ease.back(p))))
-        this.webboHop(0.6)
+        this.dance(celebration === 'big' ? 1.6 : 0.9, celebration === 'big')
+        if (celebration === 'big') this.tween(0, () => this.burst(popAt.clone().add(new THREE.Vector3(0, 1.2, 0)), [0xffc94d, 0xffffff, 0xff8a6b]), undefined, 0.25)
       })
+    }))
+  }
+
+  /** Webbo shows its web move (wiggle the fingers, point up, whoosh) so the child can copy it. */
+  showMove() {
+    const up = this.webbo.position.clone().add(new THREE.Vector3(1.5, 6, 0.6))
+    this.wiggleAndPoint(up, 0.9, () => this.tween(0.8, () => {}, () => this.restArms()))
+  }
+
+  /**
+   * The end of a round of five: fireworks, Webbo dances, and the pictures caught fly up into a row.
+   * Returns how long it lasts, so the game can show its own celebration afterwards.
+   */
+  finale() {
+    this.finishTweens()
+    const letters = this.session.slice(-5)
+    this.session = []
+    const quick = this.opts.reducedMotion
+    // The last picture caught joins the parade instead of staying where it popped.
+    for (const card of [...this.pictures]) {
+      if (card.userData.pinned) continue
+      this.disposeObject(card)
+      this.pictures.splice(this.pictures.indexOf(card), 1)
+    }
+    // Lay the row out in the free part of the screen, just under the game's top controls.
+    const rect = this.opts.canvas.getBoundingClientRect()
+    const top = this.toWorld(rect.left + rect.width / 2, rect.top + this.insets.top + 70, 2.4)
+    const left = this.toWorld(rect.left + this.insets.left + 50, rect.top + rect.height / 2, 2.4).x
+    const right = this.toWorld(rect.right - this.insets.right - 50, rect.top + rect.height / 2, 2.4).x
+    const count = Math.max(1, letters.length)
+    const spacing = Math.min(2.6, (right - left) / Math.max(1, count - 1))
+    const scale = Math.min(0.95, spacing / 2.5)
+    const look = new THREE.Vector3((left + right) / 2, top.y - 0.4, 0)
+    const rowY = look.y
+    letters.forEach((letter, i) => {
+      const card = pictureCard(letter)
+      const from = this.webbo.position.clone().add(new THREE.Vector3(0, 0.8, 0.6))
+      const to = new THREE.Vector3(look.x + (i - (letters.length - 1) / 2) * spacing, rowY + (i % 2) * 0.35, 2.4)
+      card.position.copy(from)
+      card.scale.setScalar(0.01)
+      this.scene.add(card)
+      this.parade.push(card)
+      this.tween(quick ? 0 : 0.6, (p) => {
+        card.position.lerpVectors(from, to, ease.out(p))
+        card.scale.setScalar(Math.max(0.01, scale * ease.back(p)))
+      }, undefined, quick ? 0 : 0.15 + i * 0.18)
     })
+    // Fireworks: bursts of confetti across the sky.
+    for (let i = 0; i < 6; i++) {
+      const at = new THREE.Vector3(look.x + (i - 2.5) * spacing * 0.9, rowY - 1.5 - (i % 3) * 1.1, 0.5)
+      this.tween(0, () => this.burst(at, i % 2 ? COLORS.balloons : [0xffc94d, 0xffffff, 0xff8a6b]), undefined, 0.2 + i * 0.32)
+    }
+    this.dance(2.6, true)
+    return quick ? 0.6 : 2.6
   }
 
   /** Space taken by the game's controls, in CSS pixels. */
@@ -427,6 +559,11 @@ export class WebboWorld {
   dispose() {
     cancelAnimationFrame(this.frame)
     document.removeEventListener('visibilitychange', this.onVisibility)
+    const layer = this.opts.hitLayer
+    layer.removeEventListener('pointerdown', this.onSwipeStart)
+    layer.removeEventListener('pointermove', this.onSwipeMove)
+    layer.removeEventListener('pointerup', this.onSwipeEnd)
+    layer.removeEventListener('pointercancel', this.endSwipe)
     for (const b of this.balloons) b.button.remove()
     this.disposeObject(this.scene)
     ;(this.scene.background as THREE.Texture | null)?.dispose()
@@ -663,8 +800,11 @@ export class WebboWorld {
       return 0.1
     }
     this.moving = true
-    const hand = () => this.webbo.position.clone().add(new THREE.Vector3(0, 0.6, 0))
-    this.tween(0.2, p => setStrand(this.webStrand, hand(), hand().lerp(anchor, p)), () => {
+    const hand = () => this.tipPosition()
+    this.armPose[1] = { pose: 'point', at: anchor }
+    this.fingers = 'point'
+    this.opts.onSound?.('whoosh')
+    this.tween(0.25, p => setStrand(this.webStrand, hand(), hand().lerp(anchor, p)), () => {
       const curve = new THREE.QuadraticBezierCurve3(from, low, to)
       this.tween(1.25, (p) => {
         const t = ease.inOut(p)
@@ -679,10 +819,163 @@ export class WebboWorld {
         this.webStrand.visible = false
         this.webbo.rotation.z = 0
         this.moving = false
+        this.restArms()
         this.webboHop(0.35)
       })
     })
-    return 1.25
+    return 1.3
+  }
+
+  // ---- Webbo's hands --------------------------------------------------------------------------
+
+  private get arms() {
+    return this.webbo.userData.arms as Arm[]
+  }
+
+  /** Where webs come from: the pointing fingertip of Webbo's right hand. */
+  private tipPosition() {
+    this.webbo.updateMatrixWorld(true)
+    return this.arms[1]!.tip.getWorldPosition(new THREE.Vector3())
+  }
+
+  private restArms() {
+    this.armPose = [{ pose: 'rest' }, { pose: 'rest' }]
+    this.fingers = 'still'
+  }
+
+  /** Raise the right hand towards `at`, wiggle the fingers, then point and whoosh. */
+  private wiggleAndPoint(at: THREE.Vector3, wiggleFor: number, then: () => void) {
+    this.armPose[1] = { pose: 'point', at: at.clone() }
+    if (this.opts.reducedMotion) {
+      this.fingers = 'point'
+      then()
+      return
+    }
+    this.fingers = 'wiggle'
+    this.opts.onSound?.('wiggle')
+    this.tween(wiggleFor, () => {}, () => {
+      this.fingers = 'point'
+      this.opts.onSound?.('whoosh')
+      then()
+    })
+  }
+
+  /** A happy dance: arms up and waving, a hop, and (for a big one) a spin. */
+  private dance(duration: number, spin: boolean) {
+    this.armPose = [{ pose: 'up' }, { pose: 'up' }]
+    this.fingers = 'still'
+    if (this.opts.reducedMotion) {
+      this.tween(duration, () => {}, () => this.restArms())
+      return
+    }
+    const body = this.webbo.userData.body as THREE.Group
+    const turn = this.webbo.rotation.y
+    this.tween(duration, (p) => {
+      body.position.y = Math.abs(Math.sin(p * Math.PI * (spin ? 3 : 2))) * 0.45
+      if (spin) this.webbo.rotation.y = turn + ease.inOut(Math.min(1, p * 1.6)) * Math.PI * 2
+    }, () => {
+      body.position.y = 0
+      this.webbo.rotation.y = turn
+      this.restArms()
+    })
+  }
+
+  /** Move arms and fingers a little towards their pose each frame. */
+  private animateArms(dt: number, t: number) {
+    const k = Math.min(1, dt * 12)
+    const inverse = this.webbo.quaternion.clone().invert()
+    const goal = new THREE.Quaternion()
+    const euler = new THREE.Euler()
+    this.arms.forEach((arm, i) => {
+      const pose = this.armPose[i]!
+      if (pose.pose === 'point' && pose.at) {
+        const shoulder = arm.group.getWorldPosition(new THREE.Vector3())
+        const dir = pose.at.clone().sub(shoulder).normalize().applyQuaternion(inverse)
+        goal.setFromUnitVectors(Y_AXIS, dir)
+      }
+      else if (pose.pose === 'up') {
+        goal.setFromEuler(euler.set(0, 0, -arm.side * 0.45 + Math.sin(t * 9 + arm.side) * 0.35))
+      }
+      else {
+        goal.setFromEuler(euler.set(0, 0, restAngle(arm.side) + Math.sin(t * 1.8 + arm.side) * 0.05))
+      }
+      arm.group.quaternion.slerp(goal, k)
+      arm.fingers.forEach((finger, f) => {
+        let bend = 0
+        if (this.fingers === 'wiggle') bend = Math.sin(t * 26 + finger.userData.phase) * 0.6
+        else if (this.fingers === 'point' && i === 1) bend = f === 0 ? 0 : 1.5
+        finger.rotation.x += (bend - finger.rotation.x) * Math.min(1, dt * 18)
+      })
+    })
+  }
+
+  // ---- swiping a web from Webbo to a balloon ---------------------------------------------------
+
+  private onSwipeStart = (e: PointerEvent) => {
+    if (e.target !== this.opts.hitLayer || this.swipe) return
+    const webbo = this.toScreen(this.webbo.position)
+    const reach = Math.max(70, this.screenSize(1.6, this.webbo.position))
+    if (Math.hypot(e.clientX - webbo.x, e.clientY - webbo.y) > reach) return
+    this.swipe = { pointerId: e.pointerId }
+    this.opts.hitLayer.setPointerCapture(e.pointerId)
+    this.fingers = 'point'
+    this.onSwipeMove(e)
+  }
+
+  private onSwipeMove = (e: PointerEvent) => {
+    if (!this.swipe || e.pointerId !== this.swipe.pointerId) return
+    const at = this.toWorld(e.clientX, e.clientY, 1.4)
+    this.armPose[1] = { pose: 'point', at }
+    setStrand(this.webStrand, this.tipPosition(), at)
+  }
+
+  /**
+   * Letting go over a balloon picks it, like letting go of a web. (Picking on the way would catch
+   * whichever balloon the finger crossed first, not the one the child was aiming for.)
+   */
+  private onSwipeEnd = (e: PointerEvent) => {
+    if (!this.swipe || e.pointerId !== this.swipe.pointerId) return
+    const aimed = this.balloons.find((b) => {
+      if (b.leaving) return false
+      const box = b.button.getBoundingClientRect()
+      return e.clientX >= box.left && e.clientX <= box.right && e.clientY >= box.top && e.clientY <= box.bottom
+    })
+    this.endSwipe()
+    if (aimed) {
+      this.opts.onSound?.('whoosh')
+      this.opts.onPick(aimed.letter.id)
+    }
+  }
+
+  private endSwipe = () => {
+    if (!this.swipe) return
+    try { this.opts.hitLayer.releasePointerCapture(this.swipe.pointerId) }
+    catch { /* already released */ }
+    this.swipe = null
+    this.webStrand.visible = false
+    this.restArms()
+  }
+
+  /** Screen position (CSS pixels, relative to the page) of a point in the world. */
+  private toScreen(point: THREE.Vector3) {
+    const rect = this.opts.canvas.getBoundingClientRect()
+    const p = point.clone().project(this.camera)
+    return { x: rect.left + (p.x * 0.5 + 0.5) * rect.width, y: rect.top + (-p.y * 0.5 + 0.5) * rect.height }
+  }
+
+  /** How many pixels tall something `size` units tall looks at `point`. */
+  private screenSize(size: number, point: THREE.Vector3) {
+    const tan = Math.tan(THREE.MathUtils.degToRad(FOV / 2))
+    return (size / (2 * this.camera.position.distanceTo(point) * tan)) * this.opts.canvas.clientHeight
+  }
+
+  /** The world point under a screen position, on the plane z = `z`. */
+  private toWorld(clientX: number, clientY: number, z: number) {
+    const rect = this.opts.canvas.getBoundingClientRect()
+    const ndc = new THREE.Vector3(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1, 0.5)
+    const dir = ndc.unproject(this.camera).sub(this.camera.position).normalize()
+    const distance = (z - this.camera.position.z) / dir.z
+    return this.camera.position.clone().addScaledVector(dir, distance)
   }
 
   private webboHop(height: number) {
@@ -796,6 +1089,7 @@ export class WebboWorld {
     this.backdrop.position.x = this.camera.position.x * 0.7
     this.clouds.position.x = this.camera.position.x * 0.8 + (still ? 0 : (t * 0.25) % 14)
     eyes.scale.y = (t % 4.2) > 4.05 ? 0.15 : 1
+    this.animateArms(dt, still ? 0 : t)
 
     // Balloons bob, dim while the question is asked, wobble when wrong, glow as a hint.
     const dim = this.state.calming ? 0.35 : this.state.waiting ? 0.6 : 1
@@ -847,6 +1141,10 @@ export class WebboWorld {
   private placeButtons() {
     const H = this.opts.canvas.clientHeight
     const W = this.opts.canvas.clientWidth
+    // Where Webbo is on screen (the start of a swipe), for tests and debugging.
+    const webbo = this.toScreen(this.webbo.position)
+    const where = `${Math.round(webbo.x)},${Math.round(webbo.y)}`
+    if (this.opts.hitLayer.dataset.webbo !== where) this.opts.hitLayer.dataset.webbo = where
     const tan = Math.tan(THREE.MathUtils.degToRad(FOV / 2))
     const point = new THREE.Vector3()
     for (const b of this.balloons) {

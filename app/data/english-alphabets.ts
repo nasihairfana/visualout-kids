@@ -120,6 +120,7 @@ export const englishAlphabetPack: AlphabetPack = {
     greatWriting: phrase('Great writing!', 'great-writing'),
     catchTheLetter: (l) => phrase(`Catch the letter ${l.spokenLetter}!`, `catch-the-letter-${l.id}`),
     greatSwinging: phrase('Great swinging!', 'great-swinging'),
+    wiggleAndPoint: phrase('Wiggle your fingers… and point! Whoosh!', 'wiggle-and-point'),
   },
   backgroundMusic: null,
 }

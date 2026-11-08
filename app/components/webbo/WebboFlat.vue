@@ -12,8 +12,30 @@ const props = defineProps<{
   calming: boolean
   showHint: boolean
   wiggling: string | null
+  finished: boolean
+  moves: number
 }>()
-const emit = defineEmits<{ pick: [id: string] }>()
+const emit = defineEmits<{ pick: [id: string], finaleDone: [] }>()
+
+// Webbo does its move (wiggle, then point) when asked, and points at each catch.
+const move = ref<'rest' | 'wiggle' | 'point' | 'up'>('rest')
+let moveTimer: ReturnType<typeof setTimeout> | undefined
+function doMove(then: 'point' | 'up') {
+  clearTimeout(moveTimer)
+  move.value = 'wiggle'
+  moveTimer = setTimeout(() => {
+    move.value = then
+    moveTimer = setTimeout(() => { move.value = 'rest' }, 1400)
+  }, 600)
+}
+watch(() => props.moves, () => doMove('point'))
+watch(() => props.solved, (solved) => { if (solved) doMove('up') })
+watch(() => props.finished, (finished) => {
+  if (!finished) return
+  move.value = 'up'
+  setTimeout(() => emit('finaleDone'), 600)
+})
+onBeforeUnmount(() => clearTimeout(moveTimer))
 
 const BALLOONS = ['bg-[#FFB59A]', 'bg-[#9CC8F5]', 'bg-[#9AD9B8]']
 const OFFSETS = ['landscape:translate-y-6', 'landscape:-translate-y-6', 'landscape:translate-y-4']
@@ -24,7 +46,13 @@ const OFFSETS = ['landscape:translate-y-6', 'landscape:-translate-y-6', 'landsca
     <!-- Webbo on a roof -->
     <!-- In a narrow portrait screen Webbo sits in the corner, out of the balloons' way. -->
     <div class="absolute bottom-0 left-3 flex shrink-0 flex-col items-center sm:static landscape:static">
-      <WebboIcon :happy="solved" class="w-[11vh] max-w-36 sm:w-[18vh]" :class="solved && 'animate-bounce-soft'" />
+      <WebboIcon
+        :happy="solved"
+        :pose="move === 'up' ? 'up' : move === 'rest' ? 'rest' : 'point'"
+        :wiggle="move === 'wiggle'"
+        class="w-[11vh] max-w-36 sm:w-[18vh]"
+        :class="solved && 'animate-bounce-soft'"
+      />
       <div class="h-[7vh] w-[14vh] max-w-44 rounded-t-2xl bg-lilac sm:h-[14vh] sm:w-[22vh]" />
     </div>
 

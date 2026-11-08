@@ -18,7 +18,19 @@ const game = useChoiceActivity({
 const { round, roundNumber, total, finished, solved, showHint, wiggling, waiting, calming, nudges, celebration } = game
 const gameHome = useGameHome()
 
+const { say } = useAudio()
 const flat = ref(false)
+
+// After the fifth balloon the scene plays its finale first; then the "Great swinging!" screen.
+const showFeedback = ref(false)
+watch(finished, (done) => { if (!done) showFeedback.value = false })
+
+// "Show me the move" button: Webbo wiggles and points, and the voice says how.
+const moves = ref(0)
+function showMove() {
+  moves.value++
+  say(clips.phrase(pack.phrases.wiggleAndPoint))
+}
 
 function pick(id: string) {
   const letter = round.value.choices.find(c => c.id === id)
@@ -64,15 +76,18 @@ onBeforeUnmount(() => observer?.disconnect())
       v-if="flat"
       class="absolute inset-0"
       :round="round" :solved="solved" :waiting="waiting" :calming="calming" :show-hint="showHint" :wiggling="wiggling"
+      :finished="finished" :moves="moves"
       @pick="pick"
+      @finale-done="showFeedback = true"
     />
     <WebboScene
       v-else
       class="absolute inset-0"
       :round="round" :solved="solved" :waiting="waiting" :calming="calming" :show-hint="showHint" :wiggling="wiggling"
-      :nudges="nudges" :insets="insets"
+      :nudges="nudges" :insets="insets" :celebration="celebration" :finished="finished" :moves="moves"
       @pick="pick"
       @unsupported="flat = true"
+      @finale-done="showFeedback = true"
     />
 
     <!-- Controls float over the city; only the controls themselves catch taps. -->
@@ -83,6 +98,15 @@ onBeforeUnmount(() => observer?.disconnect())
         </GameTopBar>
       </div>
       <section ref="targetRow" class="pointer-events-auto flex items-center gap-3 self-center landscape:flex-col-reverse landscape:self-start">
+        <!-- Webbo's web move, to watch and copy again -->
+        <button
+          type="button"
+          class="toy-press order-last grid size-16 shrink-0 place-items-center rounded-full bg-white text-lilac-ink landscape:order-first"
+          aria-label="Show me Webbo's web move"
+          @click="showMove"
+        >
+          <AppIcon name="hand" class="size-9" />
+        </button>
         <button
           type="button"
           class="toy-press grid size-16 shrink-0 place-items-center rounded-full bg-white text-lilac-ink"
@@ -105,12 +129,12 @@ onBeforeUnmount(() => observer?.disconnect())
 
     <footer class="pointer-events-none absolute inset-x-0 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-10 flex justify-center landscape:justify-end landscape:pr-6">
       <Transition enter-from-class="opacity-0 scale-50" enter-active-class="transition duration-300 delay-700">
-        <RoundReward v-if="solved" class="pointer-events-auto" :celebration="celebration" @next="game.nextRound()" />
+        <RoundReward v-if="solved && !finished" class="pointer-events-auto" :celebration="celebration" @next="game.nextRound()" />
       </Transition>
     </footer>
 
     <GameFeedback
-      v-if="finished"
+      v-if="finished && showFeedback"
       message="Great swinging!"
       :clip="clips.phrase(pack.phrases.greatSwinging)"
       @replay="game.restart()"

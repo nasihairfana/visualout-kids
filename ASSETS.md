@@ -59,6 +59,7 @@ nest orange parrot queen rabbit sun tiger umbrella van watermelon xylophone yo-y
 | `great-writing.mp3` | "Great writing!" |
 | `catch-the-letter-{id}.mp3` (26) | "Catch the letter A!" Webbo's question |
 | `great-swinging.mp3` | "Great swinging!" After Webbo's fifth balloon |
+| `wiggle-and-point.mp3` | "Wiggle your fingers… and point! Whoosh!" Webbo's web move, said playfully so the child copies it |
 
 ### 4. Object sounds (optional): `public/audio/en/objects/{word-slug}.mp3`
 

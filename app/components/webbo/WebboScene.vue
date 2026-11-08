@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Round } from '~/composables/useAlphabetGame'
+import type { Celebration } from '~/composables/useChoiceActivity'
 import type { Insets, WebboWorld, WorldLetter } from '~/games/webbo/world'
 
 /**
@@ -15,8 +16,14 @@ const props = defineProps<{
   wiggling: string | null
   nudges: number
   insets: Insets
+  celebration: Celebration
+  /** The fifth balloon is done: play the finale, then emit `finaleDone`. */
+  finished: boolean
+  /** Bumped when the child asks to see Webbo's web move again. */
+  moves: number
 }>()
-const emit = defineEmits<{ pick: [id: string], unsupported: [] }>()
+const emit = defineEmits<{ pick: [id: string], unsupported: [], finaleDone: [] }>()
+const { effect } = useAudio()
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const hitLayer = ref<HTMLElement | null>(null)
@@ -42,6 +49,7 @@ onMounted(async () => {
       canvas: canvas.value,
       hitLayer: hitLayer.value,
       onPick: id => emit('pick', id),
+      onSound: name => effect(name),
       reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     })
   }
@@ -58,7 +66,13 @@ onMounted(async () => {
 })
 
 watch(() => props.round, round => world?.setRound(toWorld(round), round.target.id))
-watch(() => props.solved, (solved) => { if (solved) world?.catch(props.round.target.id) })
+watch(() => props.solved, (solved) => { if (solved) world?.catch(props.round.target.id, props.celebration) })
+watch(() => props.finished, (finished) => {
+  if (!finished) return
+  const seconds = world?.finale() ?? 0
+  setTimeout(() => emit('finaleDone'), seconds * 1000)
+})
+watch(() => props.moves, () => world?.showMove())
 watch(() => [props.waiting, props.calming, props.showHint], pushState)
 watch(() => props.wiggling, (id) => { if (id) world?.wiggle(id) })
 watch(() => props.nudges, () => world?.nudge())
@@ -75,6 +89,7 @@ onBeforeUnmount(() => {
   <div class="overflow-hidden">
     <canvas ref="canvas" class="block size-full transition-opacity duration-500" :class="ready ? 'opacity-100' : 'opacity-0'" />
     <!-- One invisible button per balloon, kept over it by the world. -->
-    <div ref="hitLayer" class="absolute inset-0" />
+    <!-- Also where a web is swiped from Webbo to a balloon, so the browser mustn't scroll or zoom. -->
+    <div ref="hitLayer" class="absolute inset-0 touch-none" />
   </div>
 </template>

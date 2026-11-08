@@ -104,6 +104,18 @@ Playable at `/abc/web`, with a 5th card on the My First ABC home.
 | 3D picking | **Invisible `<button>` per balloon**, kept over it each frame | Bigger tap targets, keyboard and screen-reader access, and easy to test |
 | Webbo swings to the balloon | **Webbo webs the balloon in** to its roof, then swings to the next roof between rounds | Easier to follow for a toddler: one clear "catch", then one clear "swing" |
 
+Added after a child's feedback ("where are the spider's hands?"):
+
+- **Webbo's web move.** Two of Webbo's eight limbs are arms with mitten hands. Before each web it
+  wiggles its fingers and points (whoosh!). It's a move toddlers can copy with their own hands, taken
+  from the Itsy Bitsy Spider finger play and deliberately not Spider-Man's hand sign. A "Do it with
+  me!" intro teaches it once per visit, and a hand button shows it again. No camera: it's pretend play.
+- **Swipe to throw a web.** Besides tapping, a swipe from Webbo that is released over a balloon picks
+  it. Picking on release, not on crossing, means the balloon aimed at is the one caught.
+- **Celebrations.** Each catch gets confetti and a dance with arms up; a first-try catch adds a spin
+  and a second burst. After five balloons, fireworks and a parade of the five pictures play before
+  "Great swinging!".
+
 Size: three.js and the world are a separate ~140 KB (gzipped) file, so they load only on this page.
 
 Tested in headless Firefox with real mouse clicks: full 5-round games in portrait (375×812) and
