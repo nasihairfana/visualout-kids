@@ -89,6 +89,16 @@ export interface AlphabetPack {
     /** Webbo's question, e.g. "Catch the letter A!" */
     catchTheLetter: (letter: AlphabetLetter) => SpokenPhrase
     greatSwinging: SpokenPhrase
+    /** Letter Trails: "Follow the letter A!" */
+    followTheLetter: (letter: AlphabetLetter) => SpokenPhrase
+    /** Letter Trails, big and little letters: "Find big A and little a!" */
+    bigAndLittle: (letter: AlphabetLetter) => SpokenPhrase
+    /** Letter Trails, a sequence: "Follow the letters in order!" (then the letters are said) */
+    followTheLetters: SpokenPhrase
+    /** Letter Trails, a word: "Let's spell!" (then the letters and the word are said) */
+    letsSpell: SpokenPhrase
+    /** Letter Trails, at the goal. */
+    foundTheWay: SpokenPhrase
     /** Webbo's web move, for the child to copy with their own hand. */
     wiggleAndPoint: SpokenPhrase
   }
