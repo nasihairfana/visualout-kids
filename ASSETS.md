@@ -11,12 +11,13 @@ that doesn't exist**: a path is only switched on once it is listed in
 |---|---|---|
 | Letter recordings (26) | **Generated** (Kokoro `af_heart`) | Can be replaced by human recordings at any time |
 | Word recordings (26) | **Generated** | Same as above |
-| Phrase recordings (113, instructions & praise) | **Generated** | Same as above |
+| Phrase recordings (113, instructions & praise) | **Generated**, except the 55 Letter Trails phrases (still to run `npm run audio`) | Device voice for those, if switched on |
 | Object sounds (optional) | **Missing** | No sound. These are optional extras |
 | Background music (optional) | **Missing** | The toggle is disabled in Parent settings |
 | Illustrations (26) | **Placeholder SVGs** in `public/illustrations/` | Simple stand-in drawings. If a file fails to load, an emoji is shown instead |
 | Interaction sounds (tap, success, try-again, celebrate) | **Done** | Generated live with the Web Audio API, so no files are needed |
 | Webbo (3D model and flat icon) | **Placeholder**, built from simple shapes in `app/games/webbo/world.ts` and `WebboIcon.vue` | Works as is. Final art should keep Webbo an original character: no mask, suit, chest emblem or red-and-blue look |
+| Letter Trails friends and scenery | **Placeholder** SVG drawings in `app/components/trail/TrailArt.vue` | Works as is. Replace one `kind` at a time; keep the 100×100 view box and the soft ink outline |
 | App icons | Done (first pass) | `public/icons/icon.svg`. Re-run `npx pwa-assets-generator` after changing it |
 
 ## Audio
@@ -60,6 +61,19 @@ nest orange parrot queen rabbit sun tiger umbrella van watermelon xylophone yo-y
 | `catch-the-letter-{id}.mp3` (26) | "Catch the letter A!" Webbo's question |
 | `great-swinging.mp3` | "Great swinging!" After Webbo's fifth balloon |
 | `wiggle-and-point.mp3` | "Wiggle your fingers… and point! Whoosh!" Webbo's web move, said playfully so the child copies it |
+| `follow-the-letter-{id}.mp3` (26) | "Follow the letter A!" Letter Trails, one letter |
+| `big-and-little-{id}.mp3` (26) | "Find big A and little A!" Letter Trails, mixed case |
+| `follow-the-letters.mp3` | "Follow the letters in order!" Letter Trails, alphabet order (the letters are then said one by one) |
+| `lets-spell.mp3` | "Let's spell!" Letter Trails, words (then the letters and the word) |
+| `found-the-way.mp3` | "Hooray! You found the way!" End of a Letter Trails level |
+
+The Letter Trails phrases above are **not voiced yet** (the machine they were written on had no
+ffmpeg). Until `npm run audio` is run, the game uses the device voice for them when that is switched
+on in Parent settings.
+
+Each Letter Trails friend also says a short arrival line ("Bunny found the carrots!", see
+`arrival` in `app/data/trail-themes.ts`). These have no recordings yet and use the device voice when it
+is switched on in Parent settings; otherwise they stay silent.
 
 ### 4. Object sounds (optional): `public/audio/en/objects/{word-slug}.mp3`
 
