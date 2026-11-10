@@ -72,7 +72,8 @@ airplane mode, then relaunch it.
 | **Match** | `/abc/match` | Shows a letter and 3 pictures, and asks "Which one starts with A?" It follows the same rules as Find the letter |
 | **Write** | `/abc/write?letter=a` | Trace a big dotted capital with a finger. A glowing dot first shows how; a green start dot and arrow mark where each line begins. Each traced line snaps solid with a chime, and the finished letter pops in full colour with its picture and "You wrote A!". The eraser wipes it to try again, and the hand button shows how again. Starts at the first letter not yet written |
 | **Webbo** | `/abc/web` | Webbo's Letter City, in 3D. First, "Do it with me!": Webbo shows its web move (wiggle your fingers… and point! Whoosh!) and a big hand invites the child to copy it. Then the camera stands behind Webbo on a rooftop, looking out over the city; three buildings ahead carry big letter signs. "Catch the letter B!": tap the right building (or swipe a web from Webbo to it); Webbo wiggles, points, webs the sign and jumps over in one gentle arc, the sign pops into its picture, and Webbo dances. After five, a finale: fireworks and a parade of the pictures caught. `?view=side` shows the original side-on view with balloons. Falls back to a flat version if the phone can't do 3D |
-| Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, content status, privacy notes, and who makes Visualout Kids |
+| **Letter Trails** | `/abc/trail` | Guide a friend home along a road map of letter tiles. "Follow the letter E!": tap the next E next to the bunny (or drag the bunny along), and it hops on; the trail turns gold until it reaches the carrots. Eight friends (bunny → carrots, bird → nest, puppy → doghouse, duckling → mother duck, cat → kitten, baby elephant → mother, butterfly → flower, child → parents) open up as stars are earned. Three ways to play: **Beginner** (one letter, one case, short trails), **Challenge** (more letters to tell apart, longer trails, then big A and little a together) and **Super Challenge** (letters in order, then spelling simple words). Each level gets a little harder. No timer; every finished level earns 3 stars |
+| Parents | `/abc/parents` | Opened by **holding** the lock button on the game's home screen for 2 seconds. It has volume, auto-speak, device-voice fallback, music and progress reset. It also shows which letter shapes the child recognises, Letter Trails stars and levels, content status, privacy notes, and who makes Visualout Kids |
 
 ### Webbo's Letter City (3D)
 
@@ -114,6 +115,28 @@ masks, suits, chest emblems and red-and-blue colouring. The design is in
   first few seconds run slowly. If WebGL isn't available, or the context is lost, `WebboFlat.vue`
   plays the same game in 2D.
 
+### Letter Trails
+
+- **One way through.** `app/games/trail/levels.ts` builds each level from a seed (difficulty +
+  level number), so a level is always the same map. The trail is a random walk from the left edge to
+  the goal on the right that never touches itself. The letters on it never appear anywhere else on the
+  map, so there is exactly one right route.
+- **Gently harder.** Beginner starts with 3×4 maps and one or two other letters; later levels add
+  columns, longer trails and more letters to tell apart. Challenge mixes big and little letters
+  (follow every A and a). Super Challenge follows letters in alphabet order (A, B, C, D), then
+  spells short words (CAT, DOG, BALL).
+- **Never a fail.** A wrong letter wobbles and says its name; the friend just stays put. The right
+  letter further along lights up the next step instead. Two wrong taps in a row, or a 7-second
+  pause, and the next tile glows. No timer, no score to lose: every finished level earns 3 stars,
+  and stars open new friends (6, 12, 18 … 45).
+- **Tap or drag.** Tap the next tile, or put a finger on the friend and drag it along the road; a drag
+  only ever tries the tile right next to it. Tiles are real buttons for keyboards and screen readers.
+- **Fits every screen.** On a tall phone the map turns on its side so tiles stay big (at least
+  64 px on a 360 px-wide phone, at most 128 px on a desktop). The target card sits on top in portrait
+  and on the side in landscape. The scenery stays behind the map, so letters are always easy to read.
+- Progress (levels, stars, chosen friend) is kept on the device in `vk.abc.trail.v1`. Clear progress
+  in Parent settings resets it.
+
 ### Writing for small fingers
 
 Write is tuned for 2- and 3-year-olds (see `LetterTracer.vue`):
@@ -154,6 +177,8 @@ app/
   data/english-alphabets.ts    English A–Z content, phrases, asset registration ← edit content here
   games/webbo/world.ts         Webbo's 3D world (three.js): Webbo, animations, celebrations; side-on view
   games/webbo/rooftop.ts       Rooftop view (default): behind Webbo, letter signs on buildings ahead
+  games/trail/levels.ts        Letter Trails level builder: seeded maps, one-way trails, difficulty ramp
+  data/trail-themes.ts         Letter Trails friends and worlds: colours, scenery, stars to unlock
   data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
@@ -163,17 +188,20 @@ app/
     useAlphabetGame.ts         Content access, round generation (avoids look-alike letters), round sessions
     useGameHome.ts             The current game's home path (e.g. /abc), for Home buttons
     useChoiceActivity.ts       Reusable "pick 1 of 3" engine: wait-then-look, calm pause, hints, no score
+    useTrailProgress.ts        Letter Trails levels, stars and unlocked friends (on-device only)
   components/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
                                LetterQuiz, LetterObjectMatch, ObjectIllustration,
                                AlphabetWrite, LetterTracer (tracing: checkpoints, crayon, show-me)
     webbo/                     WebboGame (rules and controls), WebboScene (hosts the 3D world),
                                WebboFlat (2D fallback), WebboIcon (flat Webbo)
+    trail/                     TrailHome (friends and difficulty), TrailGame (rules), TrailBoard (map,
+                               tap and drag), TrailSuccess, TrailScenery, TrailArt (placeholder art)
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
     platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)
   pages/index.vue              Visualout Kids home page (for parents)
-  pages/abc/                   My First ABC: index, explore, find, match, parents
+  pages/abc/                   My First ABC: index, explore, find, match, write, web, trail, parents
 scripts/postbuild.mjs          After each build: per-game link-preview tags, Cloudflare Pages headers
 scripts/make-og-images.mjs     Renders the link-preview images in public/og (run by hand after changes)
 scripts/generate-audio.mjs     `npm run audio`: voices every clip offline with Kokoro, writes the audio manifest
@@ -239,7 +267,8 @@ away from the game controls.
 - **Offline install not yet verified on a real device.** The build precaches every file (234
   entries, 2.5 MB, including all routes, illustrations and speech clips), but the dev sandbox couldn't run a service worker.
   Check this on an Android phone: install → airplane mode → relaunch.
-- Speech is generated, not yet human-recorded, and all illustrations are placeholders. See [ASSETS.md](ASSETS.md).
+- Speech is generated, not yet human-recorded, and all illustrations (including the Letter Trails
+  friends) are placeholders. See [ASSETS.md](ASSETS.md).
 - Usability testing with parents and children aged 2–3 is still to do.
 
 ## Support the project

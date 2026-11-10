@@ -1,12 +1,16 @@
 <script setup lang="ts">
-/** Home button · centre slot · sound toggle. Shared by every activity screen. */
+/**
+ * Home button · centre slot · sound toggle. Shared by every activity screen.
+ * Home goes to the game's own home, or to `home` when an activity has its own map (Letter Trails).
+ */
+const props = defineProps<{ home?: string }>()
 const { stop, effect } = useAudio()
 const gameHome = useGameHome()
 
 function goHome() {
   stop()
   effect('page')
-  navigateTo(gameHome.value)
+  navigateTo(props.home ?? gameHome.value)
 }
 </script>
 

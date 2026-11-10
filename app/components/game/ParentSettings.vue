@@ -2,6 +2,7 @@
 /** Parent area: sound, voice, progress reset and privacy notes. No links out, no accounts. */
 const { settings, reset: resetSettings } = useSoundSettings()
 const { exploredCount, writtenSet, letterStatus, levelOf, reset: resetProgress } = useGameProgress()
+const trail = useTrailProgress()
 const { letters, pack } = useAlphabetGame()
 const { say, effect, deviceVoiceSupported } = useAudio()
 
@@ -25,6 +26,7 @@ function testVoice() {
 
 function clearProgress() {
   resetProgress()
+  trail.reset()
   confirmReset.value = false
 }
 </script>
@@ -100,6 +102,10 @@ function clearProgress() {
         <li>Find the letter now uses: <b class="text-ink">{{ LEVEL_NAMES[levelOf('find')] }}</b>. It moves up or down on its own.</li>
         <li>Letters written in Write: <b class="text-ink">{{ writtenSet.size }} / {{ letters.length }}</b></li>
         <li>Starting sounds recognised in Match: <b class="text-ink">{{ knownCount('match') }} / {{ letters.length }}</b></li>
+        <li>
+          Letter Trails: <b class="text-ink">{{ trail.totalStars.value }} stars</b>, at level
+          {{ trail.levelOf('beginner') }} in Beginner, {{ trail.levelOf('challenge') }} in Challenge and {{ trail.levelOf('super') }} in Super Challenge
+        </li>
       </ul>
 
       <button v-if="!confirmReset" type="button" class="toy-press min-h-16 w-full rounded-2xl bg-cream font-bold" @click="confirmReset = true">
