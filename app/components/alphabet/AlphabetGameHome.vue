@@ -123,8 +123,12 @@ function open(path: string) {
       </button>
     </main>
 
-    <footer class="flex justify-start">
+    <footer class="flex items-center justify-between gap-3">
       <ParentGate @unlock="open('/abc/parents')" />
+      <button type="button" class="toy-press flex min-h-16 items-center gap-2 rounded-full bg-sunny px-5 text-xl font-black text-ink" aria-label="Numbers and Counting" data-switch="numbers" @click="open('/numbers')">
+        <span aria-hidden="true">1 2 3</span>
+        <AppIcon name="next" class="size-6" />
+      </button>
     </footer>
   </div>
 </template>

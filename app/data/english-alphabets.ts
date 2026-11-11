@@ -1,5 +1,6 @@
 import type { AlphabetLetter, AlphabetPack, CardTheme, LetterAssets, SpokenPhrase } from '~/types/learning'
 import audioManifest from './audio-manifest.json' with { type: 'json' }
+import { numbersAudioCatalog } from './english-numbers'
 
 /**
  * English A–Z content for "My First ABC".
@@ -156,5 +157,7 @@ export function audioCatalog(): AudioClip[] {
       clips.push({ kind: 'phrases', id: p.id, path: audioPaths.phrase(p.id), text: p.text })
     }
   }
+  // Numbers & Counting shares the phrase folder (number-7.mp3, numbers-find.mp3, …).
+  for (const p of numbersAudioCatalog()) clips.push({ kind: 'phrases', id: p.id, path: audioPaths.phrase(p.id), text: p.text })
   return clips
 }

@@ -37,4 +37,11 @@ export const games = [
     blurb: 'Meet all 26 letters: hear them, find them by shape, and match them to pictures.',
     icon: '/icons/icon.svg',
   },
+  {
+    path: '/numbers',
+    name: 'Numbers & Counting',
+    ages: 'Ages 2–5',
+    blurb: 'Eleven little adventures: count apples, feed the fish, pop balloons, fill the number train and more.',
+    icon: '/icons/numbers.svg',
+  },
 ]

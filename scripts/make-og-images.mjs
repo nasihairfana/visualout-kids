@@ -14,15 +14,15 @@ const tile = (x, y, size, bg, ink, ch, rotate = 0) => `
     <text x="${x + size / 2}" y="${y + size * 0.73}" text-anchor="middle" font-family="${FONT}" font-weight="800" font-size="${size * 0.66}" fill="${ink}">${ch}</text>
   </g>`
 
-function card({ eyebrow, title, subtitle }) {
+function card({ eyebrow, title, subtitle, tiles = ['A', 'b', 'C', 'd'] }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#FFF4E6"/>
   <circle cx="1130" cy="70" r="120" fill="#FFC94D" opacity="0.35"/>
   <circle cx="80" cy="600" r="90" fill="#C9F2DF"/>
-  ${tile(850, 105, 170, '#FFD8C2', '#8A3412', 'A', -6)}
-  ${tile(1035, 160, 135, '#CFE7FF', '#12457A', 'b', 7)}
-  ${tile(870, 315, 150, '#C9F2DF', '#0F5C3C', 'C', 5)}
-  ${tile(1045, 335, 120, '#E5DBFF', '#4B2A91', 'd', -8)}
+  ${tile(850, 105, 170, '#FFD8C2', '#8A3412', tiles[0], -6)}
+  ${tile(1035, 160, 135, '#CFE7FF', '#12457A', tiles[1], 7)}
+  ${tile(870, 315, 150, '#C9F2DF', '#0F5C3C', tiles[2], 5)}
+  ${tile(1045, 335, 120, '#E5DBFF', '#4B2A91', tiles[3], -8)}
   <text x="80" y="150" font-family="${FONT}" font-weight="800" font-size="30" letter-spacing="5" fill="#FF8A6B">${eyebrow}</text>
   ${title.map((line, i) => `<text x="76" y="${245 + i * 78}" font-family="${FONT}" font-weight="800" font-size="66" fill="#2B2240">${line}</text>`).join('')}
   <text x="80" y="${265 + title.length * 78}" font-family="${FONT}" font-size="30" fill="#5B5170">${subtitle}</text>
@@ -43,6 +43,12 @@ const images = {
     eyebrow: 'AGES 2–3 · FREE · NO ADS',
     title: ['My First ABC'],
     subtitle: 'Hear, find and match all 26 letters',
+  }),
+  'public/og/numbers.png': card({
+    eyebrow: 'AGES 2–5 · FREE · NO ADS',
+    title: ['Numbers &amp;', 'Counting'],
+    subtitle: 'Count, match, order, add and take away',
+    tiles: ['1', '2', '3', '4'],
   }),
 }
 
