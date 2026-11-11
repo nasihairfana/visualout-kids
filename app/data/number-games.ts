@@ -5,8 +5,9 @@ import type { NumbersPhrase } from './english-numbers'
  * engines (see app/components/numbers/):
  *   collect  · move things into a basket, fish or cake, counting each one (one-to-one)
  *   find     · tap the balloon / fish / planet with the right number
- *   sequence · put numbers in order (train carriages, lily pads)
+ *   sequence · put numbers in order (lily pads)
  *   match    · join each number to the group with that many (butterflies, parking spaces)
+ *   journey  · the Number Train Adventure: three stations along one railway (its own component)
  */
 export type NumberArtKind =
   // things to count
@@ -19,7 +20,7 @@ export type NumberArtKind =
   | 'cloud' | 'sun' | 'tree' | 'bush' | 'fence' | 'barn' | 'hay' | 'reeds' | 'seaweed' | 'bubble'
   | 'rock' | 'moon' | 'twinkle' | 'gift' | 'bunting' | 'house' | 'sunflower' | 'mushroom' | 'coral'
 
-export type NumberEngine = 'collect' | 'find' | 'sequence' | 'match'
+export type NumberEngine = 'collect' | 'find' | 'sequence' | 'match' | 'journey'
 
 export interface NumberWorld {
   skyTop: string
@@ -65,7 +66,7 @@ export const NUMBER_GAMES: NumberGame[] = [
   { id: 'balloons', title: 'Pop the Balloons', engine: 'find', tone: 'bg-rose text-rose-ink', hero: 'balloon', items: ['balloon'], ask: 'popBalloon', cheer: 'yay', unlockAt: 0, world: PARTY },
   { id: 'fish', title: 'Feed the Fish', engine: 'collect', tone: 'bg-sky text-sky-ink', hero: 'bigfish', items: ['pellet', 'worm'], ask: 'feedTheFish', cheer: 'yum', unlockAt: 0, world: SEA },
   { id: 'matching', title: 'Number Matching', engine: 'match', tone: 'bg-lilac text-lilac-ink', hero: 'butterfly', items: ['butterfly', 'ladybug', 'star', 'flower', 'duckling'], ask: 'matchThem', cheer: 'wellDone', unlockAt: 0, world: MEADOW },
-  { id: 'train', title: 'Number Train', engine: 'sequence', tone: 'bg-peach text-peach-ink', hero: 'engine', items: ['carriage'], ask: 'inOrder', cheer: 'allAboard', unlockAt: 0, world: TOWN },
+  { id: 'train', title: 'Number Train Adventure', engine: 'journey', tone: 'bg-peach text-peach-ink', hero: 'engine', items: ['carriage'], ask: 'inOrder', cheer: 'allAboard', unlockAt: 0, world: TOWN },
   { id: 'frog', title: 'Number Jumping', engine: 'sequence', tone: 'bg-mint text-mint-ink', hero: 'frog', items: ['lilypad'], ask: 'jump', cheer: 'wellDone', unlockAt: 0, world: POND },
   { id: 'farmer', title: 'Help the Farmer', engine: 'collect', tone: 'bg-butter text-butter-ink', hero: 'farmer', items: ['egg', 'tomato', 'pumpkin'], ask: 'collect', cheer: 'greatCounting', unlockAt: 3, world: FARM },
   { id: 'fishing', title: 'Number Fishing', engine: 'find', tone: 'bg-sky text-sky-ink', hero: 'fish', items: ['fish'], ask: 'catchFish', cheer: 'yay', unlockAt: 6, world: SEA },

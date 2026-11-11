@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Difficulty } from '~/games/numbers/rounds'
 import { ROUNDS_PER_SESSION } from '~/games/numbers/rounds'
-import type { NumberGame } from '~/data/number-games'
+import type { NumberEngine, NumberGame } from '~/data/number-games'
 import CollectEngine from '~/components/numbers/engines/CollectEngine.vue'
 import FindEngine from '~/components/numbers/engines/FindEngine.vue'
 import SequenceEngine from '~/components/numbers/engines/SequenceEngine.vue'
@@ -62,7 +62,7 @@ function again() {
 
     <main class="relative z-10 min-h-0 flex-1">
       <component
-        :is="ENGINES[game.engine]"
+        :is="ENGINES[game.engine as Exclude<NumberEngine, 'journey'>]"
         :key="`${session}-${index}`"
         :game="game"
         :difficulty="difficulty"

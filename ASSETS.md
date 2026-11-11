@@ -18,8 +18,8 @@ that doesn't exist**: a path is only switched on once it is listed in
 | Interaction sounds (tap, success, try-again, celebrate) | **Done** | Generated live with the Web Audio API, so no files are needed |
 | Webbo (3D model and flat icon) | **Placeholder**, built from simple shapes in `app/games/webbo/world.ts` and `WebboIcon.vue` | Works as is. Final art should keep Webbo an original character: no mask, suit, chest emblem or red-and-blue look |
 | Letter Trails friends and scenery | **Placeholder** SVG drawings in `app/components/trail/TrailArt.vue` | Works as is. Replace one `kind` at a time; keep the 100×100 view box and the soft ink outline |
-| Numbers & Counting art | **Placeholder** SVG drawings in `app/components/numbers/NumberArt.vue` (it reuses the Letter Trails animals and scenery) | Works as is. Replace one `kind` at a time; keep the 100×100 view box. Balloons, fish, cars, planets and candles take a `tint` |
-| Numbers & Counting speech (31 numbers, 34 phrases) | **Not voiced yet** | Device voice, if switched on in Parent settings. Run `npm run audio` |
+| Numbers & Counting art | **Placeholder** SVG drawings in `app/components/numbers/NumberArt.vue` (it reuses the Letter Trails animals and scenery), and for the Number Train Adventure in `app/components/numbers/train/` (the train, Bunny the driver and the passengers in `JourneyTrain.vue`, the stations in `JourneyWorld.vue`) | Works as is. Replace one `kind` at a time; keep the 100×100 view box. Balloons, fish, cars, planets and candles take a `tint` |
+| Numbers & Counting speech (31 numbers, 40 phrases) | **Not voiced yet** | Device voice, if switched on in Parent settings. Run `npm run audio` |
 | App icons | Done (first pass) | `public/icons/icon.svg`. Re-run `npx pwa-assets-generator` after changing it |
 
 ## Audio
@@ -84,6 +84,7 @@ Numbers & Counting (`app/data/english-numbers.ts`) adds, in the same folder and 
 | `numbers-in-order.mp3`, `numbers-count-back.mp3`, `numbers-count-by-twos.mp3`, `numbers-jump.mp3`, `numbers-match-them.mp3`, `numbers-park-them.mp3`, `numbers-count-together.mp3` | Instructions |
 | `numbers-thats.mp3`, `numbers-thats-more.mp3`, `numbers-thats-less.mp3` | Gentle feedback after a wrong pick |
 | `numbers-well-done.mp3`, `numbers-yay.mp3`, `numbers-great-counting.mp3`, `numbers-all-aboard.mp3`, `numbers-yum.mp3`, `numbers-happy-birthday.mp3` | Cheers |
+| `numbers-number-valley.mp3`, `numbers-missing-bridge.mp3`, `numbers-animal-station.mp3`, `numbers-party-station.mp3`, `numbers-next-stop.mp3`, `numbers-great-job.mp3` | Number Train Adventure: arriving at each station, setting off, and after each station |
 
 The full list, with exact texts, comes from `numbersAudioCatalog()`; `npm run audio` picks it up.
 

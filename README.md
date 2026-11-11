@@ -186,7 +186,7 @@ Counting, Number Parking and Space Adventure every 3 more). Replay is always one
 | **Pop the Balloons** | `/numbers/balloons` | "Pop the balloon with 4!" Tap the right balloon: pop! |
 | **Feed the Fish** | `/numbers/fish` | Feed the hungry fish the right number of food pieces; it munches each one |
 | **Number Matching** | `/numbers/matching` | Drag each number onto the group with that many (3 → three butterflies). Tapping a group counts it aloud first |
-| **Number Train** | `/numbers/train` | Drag the numbers into the empty carriages in order; the train chugs off when it's full. Missing-number trains too |
+| **Number Train Adventure** | `/numbers/train` | Bunny drives the Number Train along one railway to three stations: put the numbers in order at **Number Valley**, drag in the missing number on **Missing Number Bridge**, count the animal passengers at **Animal Station**, then on to **Party Station** for the whole journey and its 9 stars. See below |
 | **Number Jumping** | `/numbers/frog` | Tap the lily pads in order and the frog hops across the pond |
 | **Help the Farmer** | `/numbers/farmer` | Collect eggs, tomatoes and pumpkins, with the running count above the basket |
 | **Number Fishing** | `/numbers/fishing` | Catch the fish with the right number |
@@ -206,9 +206,9 @@ Counting, Number Parking and Space Adventure every 3 more). Replay is always one
 Inside each difficulty it creeps up gently with every finished session (`step` in
 `app/games/numbers/rounds.ts`), and inside each session over its five rounds.
 
-- **Four engines, eleven adventures.** `app/components/numbers/engines/`: `CollectEngine` (basket,
-  fish, cake), `FindEngine` (balloons, fish, planets), `SequenceEngine` (train, lily pads) and
-  `MatchEngine` (groups, parking spaces). Each adventure in `app/data/number-games.ts` is an engine
+- **Four engines and a journey.** `app/components/numbers/engines/`: `CollectEngine` (basket,
+  fish, cake), `FindEngine` (balloons, fish, planets), `SequenceEngine` (lily pads) and
+  `MatchEngine` (groups, parking spaces). The Number Train has its own journey (below). Each adventure in `app/data/number-games.ts` is an engine
   plus its world, its friend, the things to count and what's said.
 - **One-to-one counting.** A thing is only ever counted once: it gets its number as it moves in and
   keeps it. Counting out loud (`useCounting`) lights each thing as its number is said, and waits
@@ -221,6 +221,34 @@ Inside each difficulty it creeps up gently with every finished session (`step` i
   button for keyboards and screen readers.
 - Progress (sessions finished, chosen difficulty) is kept on the device in `vk.numbers.v1`. Clear
   progress in Parent settings resets it.
+
+### Number Train Adventure
+
+`app/components/numbers/train/`. One journey instead of five rounds:
+
+| Station | What the child does |
+|---|---|
+| **Number Valley** | Five empty carriages and five shuffled number tiles (1–5 for Beginner). Drag each number onto its carriage; a right one snaps in and is said, a wrong one floats back to the tray and says its name |
+| **Missing Number Bridge** | The train stops on a bridge over a river. Five numbers, one missing (anywhere in the run), three tiles to choose from |
+| **Animal Station** | Rabbits, bears, ducks and cats get on. Tap a carriage to count who's in it (each animal lights up and gets its number, once), then drag the total into the answer box |
+| **Party Station** | Balloons and confetti; the whole journey, 3 stars for each station, Bunny and the passengers celebrating, play again |
+
+- **The train really travels.** `TrainJourney` moves the train and, a moment behind, the camera
+  along one long world (`JourneyWorld`), so the train pulls away, rolls past the scenery and brakes
+  into the next station. Far mountains, hills and clouds move slower than the rails. The wheels
+  turn with the distance covered and the driving rods follow them; smoke puffs faster while moving;
+  Bunny waves; the carriages bob together. Reduced motion shortens the trip and stops the bobbing,
+  smoke and confetti.
+- **One connected train.** `JourneyTrain` draws the locomotive and five carriages as one SVG, with
+  soft gradients and shadows for a rounded, 3D-cartoon look. Over each carriage is a tall drop zone
+  reaching up into the sky, so a number only has to be let go somewhere above the right carriage.
+- **Drag first, tap too.** Tiles are dragged (`useDragDrop`); tapping a tile tries the next empty
+  carriage, and keyboards work too. A filled carriage takes nothing more, a used tile leaves the
+  tray, and the screen never scrolls while dragging.
+- **Harder levels.** Challenge runs within 1–10 and carries up to 8 passengers; Super Challenge runs
+  within 1–20 and up to 10 passengers, two to a carriage (`app/games/numbers/journey.ts`).
+- Every station earns its 3 stars, whatever happened on the way (no fail, as everywhere else); a
+  finished journey counts as three sessions towards unlocking adventures.
 
 ## Project structure
 
@@ -235,6 +263,7 @@ app/
   data/number-games.ts         Numbers & Counting: the eleven adventures, their worlds and unlock stars
   data/english-numbers.ts      Number words and phrases for Numbers & Counting (and their audio clips)
   games/numbers/rounds.ts      Numbers round builder: what each difficulty asks, and how it ramps
+  games/numbers/journey.ts     Number Train Adventure: what each station asks, per difficulty
   data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
@@ -258,7 +287,8 @@ app/
                                tap and drag), TrailSuccess, TrailScenery, TrailArt (placeholder art)
     numbers/                   NumbersHome, NumbersPlay (a session), NumbersSuccess, NumbersScenery,
                                NumberArt (placeholder art), QuantityDots, CountGroup, NumberGameCard,
-                               engines/ (CollectEngine, FindEngine, SequenceEngine, MatchEngine)
+                               engines/ (CollectEngine, FindEngine, SequenceEngine, MatchEngine),
+                               train/ (TrainJourney, JourneyTrain, JourneyWorld, JourneyFinale)
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
     platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)

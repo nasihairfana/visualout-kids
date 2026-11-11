@@ -18,5 +18,8 @@ useHead({ title: () => `${game.value?.title ?? 'Numbers'} · Numbers & Counting`
 </script>
 
 <template>
-  <NumbersPlay v-if="game" :key="`${game.id}-${difficulty}`" :game="game" :difficulty="difficulty" />
+  <template v-if="game">
+    <TrainJourney v-if="game.engine === 'journey'" :key="`${game.id}-${difficulty}`" :game="game" :difficulty="difficulty" />
+    <NumbersPlay v-else :key="`${game.id}-${difficulty}`" :game="game" :difficulty="difficulty" />
+  </template>
 </template>

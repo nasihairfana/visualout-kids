@@ -49,11 +49,14 @@ export function useNumbersProgress() {
     .filter(([key]) => key.startsWith(`${gameId}:`))
     .reduce((sum, [, n]) => sum + n * STARS_PER_SESSION, 0)
 
-  /** Record a finished session. Returns the adventures this opened up. */
-  function complete(gameId: string, difficulty: Difficulty) {
+  /**
+   * Record finished sessions (a Number Train journey counts its three stations). Returns the
+   * adventures this opened up.
+   */
+  function complete(gameId: string, difficulty: Difficulty, sessions = 1) {
     const before = new Set(NUMBER_GAMES.filter(g => isUnlocked(g.id)).map(g => g.id))
     const key = `${gameId}:${difficulty}`
-    state.value.sessions[key] = (state.value.sessions[key] ?? 0) + 1
+    state.value.sessions[key] = (state.value.sessions[key] ?? 0) + sessions
     return NUMBER_GAMES.filter(g => !before.has(g.id) && isUnlocked(g.id))
   }
 

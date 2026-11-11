@@ -61,6 +61,13 @@ const PHRASES = {
   allAboard: 'All aboard! Choo choo!',
   yum: 'Yum!',
   happyBirthday: 'Happy birthday!',
+  // Number Train Adventure
+  numberValley: 'Welcome to Number Valley! Put the numbers in order.',
+  missingBridge: 'Missing Number Bridge! Which number is missing?',
+  animalStation: 'Animal Station! How many passengers are on the train?',
+  partyStation: 'Hooray! We made it to Party Station!',
+  greatJob: 'Great job!',
+  nextStop: 'Next stop!',
 } as const
 export type NumbersPhrase = keyof typeof PHRASES
 
