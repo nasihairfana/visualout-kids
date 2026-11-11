@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import { NUMBER_GAMES } from './app/data/number-games'
 
 // Visualout Kids (kids.visualout.com) is fully client-side: no server, no accounts, no tracking.
 // `/` is the parent-facing home page; each game lives under its own path, starting with `/abc`.
@@ -22,6 +23,8 @@ export default defineNuxtConfig({
   // Cloudflare preset, which writes to dist/ with its own _headers/_redirects and skips ours.
   nitro: {
     preset: 'static',
+    // One page per Numbers adventure (a dynamic route, so the crawler can't find them on its own).
+    prerender: { routes: NUMBER_GAMES.map(g => `/numbers/${g.id}`) },
   },
 
   vite: {

@@ -19,7 +19,7 @@ import type { SpokenClip } from '~/types/learning'
  */
 
 
-export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'stroke' | 'tryAgain' | 'celebrate' | 'wiggle' | 'whoosh' | 'giggle'
+export type EffectName = 'tap' | 'page' | 'success' | 'found' | 'stroke' | 'tryAgain' | 'celebrate' | 'wiggle' | 'whoosh' | 'giggle' | 'pop' | 'whistle'
 
 // ---- module singletons (client only) ---------------------------------------------------
 
@@ -160,6 +160,10 @@ const NOTES: Record<EffectName, Array<[freq: number, start: number, dur: number]
   giggle: [[880, 0, 0.05], [1175, 0.06, 0.05], [988, 0.12, 0.05], [1319, 0.18, 0.05], [1175, 0.24, 0.05], [1568, 0.3, 0.1]],
   // Played as a noise sweep, not notes (see `playWhoosh`).
   whoosh: [],
+  // A balloon popping: a quick bright blip that drops away.
+  pop: [[1400, 0, 0.04], [700, 0.03, 0.08], [1050, 0.08, 0.1]],
+  // The Number Train's whistle: two soft chords, toot-toot.
+  whistle: [[740, 0, 0.28], [932, 0, 0.28], [740, 0.36, 0.5], [932, 0.36, 0.5]],
   // Deliberately warm and "rising" — an invitation, never a buzzer.
   tryAgain: [[392, 0, 0.14], [523, 0.14, 0.2]],
   celebrate: [[523, 0, 0.1], [659, 0.09, 0.1], [784, 0.18, 0.1], [1047, 0.27, 0.12], [784, 0.4, 0.1], [1047, 0.5, 0.12], [1319, 0.6, 0.35]],

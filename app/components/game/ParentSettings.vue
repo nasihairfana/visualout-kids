@@ -3,6 +3,7 @@
 const { settings, reset: resetSettings } = useSoundSettings()
 const { exploredCount, writtenSet, letterStatus, levelOf, reset: resetProgress } = useGameProgress()
 const trail = useTrailProgress()
+const numbers = useNumbersProgress()
 const { letters, pack } = useAlphabetGame()
 const { say, effect, deviceVoiceSupported } = useAudio()
 
@@ -14,6 +15,7 @@ const recorded = {
 }
 const confirmReset = ref(false)
 
+const NUMBER_LEVELS = { beginner: 'Beginner (1–5)', challenge: 'Challenge (1–10)', super: 'Super Challenge (1–20)' }
 const LEVEL_NAMES = ['Very different letters', 'Mixed letters', 'Includes look-alikes (like E and F)']
 const STATUS_CLASSES = { known: 'bg-mint text-mint-ink', practising: 'bg-butter text-butter-ink', new: 'bg-cream text-ink-soft/60' }
 const shapes = computed(() => letters.map(l => ({ letter: l, status: letterStatus('find', l.id) })))
@@ -27,6 +29,7 @@ function testVoice() {
 function clearProgress() {
   resetProgress()
   trail.reset()
+  numbers.reset()
   confirmReset.value = false
 }
 </script>
@@ -105,6 +108,10 @@ function clearProgress() {
         <li>
           Letter Trails: <b class="text-ink">{{ trail.totalStars.value }} stars</b>, at level
           {{ trail.levelOf('beginner') }} in Beginner, {{ trail.levelOf('challenge') }} in Challenge and {{ trail.levelOf('super') }} in Super Challenge
+        </li>
+        <li>
+          Numbers &amp; Counting: <b class="text-ink">{{ numbers.totalStars.value }} stars</b>, playing at
+          <b class="text-ink">{{ NUMBER_LEVELS[numbers.difficulty.value] }}</b>
         </li>
       </ul>
 
