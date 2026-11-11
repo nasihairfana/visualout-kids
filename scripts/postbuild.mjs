@@ -25,6 +25,11 @@ const GAME_PAGES = {
     description: 'A gentle A–Z alphabet game for ages 2–3 by Visualout Kids. Free, no ads, no tracking, and it works offline.',
     image: '/og/my-first-abc.png',
   },
+  numbers: {
+    title: 'Numbers & Counting · Visualout Kids',
+    description: 'Counting adventures for little ones by Visualout Kids: count, match, order, add and take away. Free, no ads, no tracking, and it works offline.',
+    image: '/og/numbers.png',
+  },
 }
 
 async function htmlFiles(dir) {

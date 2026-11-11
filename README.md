@@ -2,15 +2,19 @@
 
 Gentle, free learning games for toddlers, made by [Nasiha Irfana](https://github.com/nasihairfana), at
 **[kids.visualout.com](https://kids.visualout.com)**. The first game is **My First ABC**, an A–Z
-alphabet game for children aged 2–3, at [`/abc`](https://kids.visualout.com/abc).
+alphabet game for children aged 2–3, at [`/abc`](https://kids.visualout.com/abc). The second is
+**Numbers & Counting**, eleven little counting adventures, at [`/numbers`](https://kids.visualout.com/numbers).
 
 | Path | For | What it is |
 |---|---|---|
 | `/` | Parents | The Visualout Kids home page: the games, the privacy promise, how to install, and who makes it |
 | `/abc` | Children | My First ABC. Each future game gets its own path next to it |
+| `/numbers` | Children | Numbers & Counting |
 
 The site installs as one app, **Visualout Kids**, which opens straight into `/abc`. Children never
-land on the home page from inside a game: every Home button goes back to the game's own home.
+land on the home page from inside a game: every Home button goes back to the game's own home. The
+two game homes link to each other with a big button (**123** on My First ABC, **A b c** on Numbers),
+so the installed app reaches both.
 
 It's built with Nuxt 4, Vue 3 (`<script setup lang="ts">`), TypeScript and Tailwind CSS v4. It's an
 installable PWA that works offline.
@@ -169,6 +173,55 @@ Match are built so that looking pays off and guessing doesn't (see `useChoiceAct
 - **Honest progress.** A letter only counts as recognised after 3 first-try picks in a row. This is
   stored on the device only and shown in Parent settings.
 
+## Numbers & Counting
+
+At `/numbers`. A child picks how hard (it applies to every adventure), then an adventure. Each one
+is five rounds with a Next button after each, then a celebration with 3 stars. Stars open more
+adventures (6 are open at the start; Help the Farmer at 3 stars, then Number Fishing, Birthday
+Counting, Number Parking and Space Adventure every 3 more). Replay is always one tap away.
+
+| Adventure | Route | How it plays |
+|---|---|---|
+| **Count and Collect** | `/numbers/collect` | "Collect 5!" Drag or tap apples into the basket; each one gets the next number, said aloud, and fills a dashed space, so it's counted exactly once. When it's full, everyone counts together |
+| **Pop the Balloons** | `/numbers/balloons` | "Pop the balloon with 4!" Tap the right balloon: pop! |
+| **Feed the Fish** | `/numbers/fish` | Feed the hungry fish the right number of food pieces; it munches each one |
+| **Number Matching** | `/numbers/matching` | Drag each number onto the group with that many (3 → three butterflies). Tapping a group counts it aloud first |
+| **Number Train** | `/numbers/train` | Drag the numbers into the empty carriages in order; the train chugs off when it's full. Missing-number trains too |
+| **Number Jumping** | `/numbers/frog` | Tap the lily pads in order and the frog hops across the pond |
+| **Help the Farmer** | `/numbers/farmer` | Collect eggs, tomatoes and pumpkins, with the running count above the basket |
+| **Number Fishing** | `/numbers/fishing` | Catch the fish with the right number |
+| **Birthday Counting** | `/numbers/birthday` | Put the right number of candles on Bear's cake |
+| **Number Parking** | `/numbers/parking` | Park each numbered car in the space painted with that many dots |
+| **Space Adventure** | `/numbers/space` | Fly the rocket to the planet with the right number |
+| Parents | `/numbers/parents` | The same Parent settings as My First ABC, behind the same hold-to-open gate |
+
+### How the levels work
+
+| | Numbers | What's new |
+|---|---|---|
+| **Beginner** | 1–5 | Recognise numbers, count small groups, match number and quantity. Every number is shown with its dots |
+| **Challenge** | 1–10 | Order, missing numbers (7 8 _ 10), bigger groups, which has more or less, a first "and one more" |
+| **Super Challenge** | 1–20, then up to 30 | Adding (3 and 2 makes 5) and taking away (5 take away 2 leaves 3), shown in two colours first; ten and some more (13 is a full ten-frame and 3); counting back and in twos |
+
+Inside each difficulty it creeps up gently with every finished session (`step` in
+`app/games/numbers/rounds.ts`), and inside each session over its five rounds.
+
+- **Four engines, eleven adventures.** `app/components/numbers/engines/`: `CollectEngine` (basket,
+  fish, cake), `FindEngine` (balloons, fish, planets), `SequenceEngine` (train, lily pads) and
+  `MatchEngine` (groups, parking spaces). Each adventure in `app/data/number-games.ts` is an engine
+  plus its world, its friend, the things to count and what's said.
+- **One-to-one counting.** A thing is only ever counted once: it gets its number as it moves in and
+  keeps it. Counting out loud (`useCounting`) lights each thing as its number is said, and waits
+  for the voice, so the number heard and the thing lit always go together.
+- **Number and quantity together.** Numbers come with dots in ten-frames (`QuantityDots`), so 7 is
+  "a full row and two more".
+- **Never a fail.** No timers, no score, nothing lost. A wrong pick wiggles and says its own number
+  ("That's 6"); two wrong picks and the right one glows. Nothing has to be fast.
+- **Tap or drag.** Everything that can be dragged can also be tapped (`useDragDrop`), and is a real
+  button for keyboards and screen readers.
+- Progress (sessions finished, chosen difficulty) is kept on the device in `vk.numbers.v1`. Clear
+  progress in Parent settings resets it.
+
 ## Project structure
 
 ```
@@ -179,6 +232,9 @@ app/
   games/webbo/rooftop.ts       Rooftop view (default): behind Webbo, letter signs on buildings ahead
   games/trail/levels.ts        Letter Trails level builder: seeded maps, one-way trails, difficulty ramp
   data/trail-themes.ts         Letter Trails friends and worlds: colours, scenery, stars to unlock
+  data/number-games.ts         Numbers & Counting: the eleven adventures, their worlds and unlock stars
+  data/english-numbers.ts      Number words and phrases for Numbers & Counting (and their audio clips)
+  games/numbers/rounds.ts      Numbers round builder: what each difficulty asks, and how it ramps
   data/letter-strokes.ts       How to write each capital: strokes in order, as SVG paths (used by Write)
   data/brand.ts                Who makes Visualout Kids, other Visualout products (MeqOS), the games list
   composables/
@@ -189,6 +245,9 @@ app/
     useGameHome.ts             The current game's home path (e.g. /abc), for Home buttons
     useChoiceActivity.ts       Reusable "pick 1 of 3" engine: wait-then-look, calm pause, hints, no score
     useTrailProgress.ts        Letter Trails levels, stars and unlocked friends (on-device only)
+    useNumbersProgress.ts      Numbers & Counting sessions, stars and difficulty (on-device only)
+    useCounting.ts             Count out loud, lighting each thing as its number is said
+    useDragDrop.ts             Drag onto a target or just tap: one handler for both
   components/
     alphabet/                  AlphabetGameHome, AlphabetExplore, AlphabetCard, AlphabetNavigation,
                                LetterQuiz, LetterObjectMatch, ObjectIllustration,
@@ -197,11 +256,15 @@ app/
                                WebboFlat (2D fallback), WebboIcon (flat Webbo)
     trail/                     TrailHome (friends and difficulty), TrailGame (rules), TrailBoard (map,
                                tap and drag), TrailSuccess, TrailScenery, TrailArt (placeholder art)
+    numbers/                   NumbersHome, NumbersPlay (a session), NumbersSuccess, NumbersScenery,
+                               NumberArt (placeholder art), QuantityDots, CountGroup, NumberGameCard,
+                               engines/ (CollectEngine, FindEngine, SequenceEngine, MatchEngine)
     game/                      Reusable across future games: AudioButton, GameFeedback, GameTopBar,
                                ParentGate, ParentSettings, RoundProgress, RoundReward, SoundToggle, AppIcon
     platform/                  MadeByVisualout (credit and outside links; parent-facing screens only)
   pages/index.vue              Visualout Kids home page (for parents)
   pages/abc/                   My First ABC: index, explore, find, match, write, web, trail, parents
+  pages/numbers/               Numbers & Counting: index, [game] (one adventure), parents
 scripts/postbuild.mjs          After each build: per-game link-preview tags, Cloudflare Pages headers
 scripts/make-og-images.mjs     Renders the link-preview images in public/og (run by hand after changes)
 scripts/generate-audio.mjs     `npm run audio`: voices every clip offline with Kokoro, writes the audio manifest
@@ -268,7 +331,8 @@ away from the game controls.
   entries, 2.5 MB, including all routes, illustrations and speech clips), but the dev sandbox couldn't run a service worker.
   Check this on an Android phone: install → airplane mode → relaunch.
 - Speech is generated, not yet human-recorded, and all illustrations (including the Letter Trails
-  friends) are placeholders. See [ASSETS.md](ASSETS.md).
+  friends and the Numbers & Counting art) are placeholders. Numbers & Counting is not voiced yet:
+  it uses the device voice until `npm run audio` is run. See [ASSETS.md](ASSETS.md).
 - Usability testing with parents and children aged 2–3 is still to do.
 
 ## Support the project

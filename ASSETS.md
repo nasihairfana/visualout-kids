@@ -18,6 +18,8 @@ that doesn't exist**: a path is only switched on once it is listed in
 | Interaction sounds (tap, success, try-again, celebrate) | **Done** | Generated live with the Web Audio API, so no files are needed |
 | Webbo (3D model and flat icon) | **Placeholder**, built from simple shapes in `app/games/webbo/world.ts` and `WebboIcon.vue` | Works as is. Final art should keep Webbo an original character: no mask, suit, chest emblem or red-and-blue look |
 | Letter Trails friends and scenery | **Placeholder** SVG drawings in `app/components/trail/TrailArt.vue` | Works as is. Replace one `kind` at a time; keep the 100×100 view box and the soft ink outline |
+| Numbers & Counting art | **Placeholder** SVG drawings in `app/components/numbers/NumberArt.vue` (it reuses the Letter Trails animals and scenery) | Works as is. Replace one `kind` at a time; keep the 100×100 view box. Balloons, fish, cars, planets and candles take a `tint` |
+| Numbers & Counting speech (31 numbers, 34 phrases) | **Not voiced yet** | Device voice, if switched on in Parent settings. Run `npm run audio` |
 | App icons | Done (first pass) | `public/icons/icon.svg`. Re-run `npx pwa-assets-generator` after changing it |
 
 ## Audio
@@ -70,6 +72,20 @@ nest orange parrot queen rabbit sun tiger umbrella van watermelon xylophone yo-y
 The Letter Trails phrases above are **not voiced yet** (the machine they were written on had no
 ffmpeg). Until `npm run audio` is run, the game uses the device voice for them when that is switched
 on in Parent settings.
+
+Numbers & Counting (`app/data/english-numbers.ts`) adds, in the same folder and **not voiced yet**:
+
+| File | Text |
+|---|---|
+| `number-{n}.mp3` (0–30) | "seven!" Said with a little lift, as when counting out loud |
+| `numbers-find.mp3`, `numbers-collect.mp3`, `numbers-feed-the-fish.mp3`, `numbers-candles.mp3`, `numbers-pop-balloon.mp3`, `numbers-catch-fish.mp3`, `numbers-fly-to.mp3` | The start of an instruction, followed by a number clip: "Pop the balloon with" … "four!" |
+| `numbers-how-many.mp3`, `numbers-which-more.mp3`, `numbers-which-less.mp3`, `numbers-which-is-missing.mp3`, `numbers-what-comes-next.mp3` | Questions |
+| `numbers-add-more.mp3`, `numbers-more.mp3`, `numbers-take-away.mp3`, `numbers-and.mp3`, `numbers-makes.mp3`, `numbers-take-away-leaves.mp3` | Adding and taking away: "three … and … two … makes … five!" |
+| `numbers-in-order.mp3`, `numbers-count-back.mp3`, `numbers-count-by-twos.mp3`, `numbers-jump.mp3`, `numbers-match-them.mp3`, `numbers-park-them.mp3`, `numbers-count-together.mp3` | Instructions |
+| `numbers-thats.mp3`, `numbers-thats-more.mp3`, `numbers-thats-less.mp3` | Gentle feedback after a wrong pick |
+| `numbers-well-done.mp3`, `numbers-yay.mp3`, `numbers-great-counting.mp3`, `numbers-all-aboard.mp3`, `numbers-yum.mp3`, `numbers-happy-birthday.mp3` | Cheers |
+
+The full list, with exact texts, comes from `numbersAudioCatalog()`; `npm run audio` picks it up.
 
 Each Letter Trails friend also says a short arrival line ("Bunny found the carrots!", see
 `arrival` in `app/data/trail-themes.ts`). These have no recordings yet and use the device voice when it
