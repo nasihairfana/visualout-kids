@@ -2,7 +2,7 @@
 import type { Difficulty, MatchGroup } from '~/games/numbers/rounds'
 import { matchRound, shuffle } from '~/games/numbers/rounds'
 import type { NumberGame } from '~/data/number-games'
-import { sayNumber, sayPhrase } from '~/data/english-numbers'
+import { sayAsk, sayNumber, sayPhrase, sayThats } from '~/data/english-numbers'
 
 /**
  * Match each number to the group with that many: 3 goes with three butterflies. Drag a number
@@ -30,7 +30,7 @@ const hintFor = ref<number | null>(null)
 const done = ref(false)
 let wrong = 0
 
-const instruct = () => say(sayPhrase(props.game.ask))
+const instruct = () => say(sayAsk(props.game.ask))
 onMounted(() => setTimeout(instruct, 350))
 
 /** Light a group's things one by one while counting it out loud. */
@@ -46,7 +46,7 @@ async function check(number: number, groupN: number) {
   if (number !== groupN) {
     wobble.value = { n: groupN, t: (wobble.value?.t ?? 0) + 1 }
     effect('tryAgain')
-    say([sayPhrase('thats'), sayNumber(groupN)])
+    say(sayThats(groupN))
     if (++wrong >= 2) hintFor.value = number
     return
   }
