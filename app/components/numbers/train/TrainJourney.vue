@@ -3,7 +3,7 @@ import type { Difficulty } from '~/games/numbers/rounds'
 import type { TrainCar } from '~/games/numbers/journey'
 import { planJourney, CARRIAGES } from '~/games/numbers/journey'
 import type { NumberGame } from '~/data/number-games'
-import { sayNumber, sayPhrase } from '~/data/english-numbers'
+import { sayNumber, sayPhrase, sayThats } from '~/data/english-numbers'
 
 /**
  * Number Train Adventure: Bunny drives the Number Train along one railway, stopping at three
@@ -187,7 +187,7 @@ const instruct = () => say(sayPhrase(STATIONS[station.value]!.phrase))
 function wrongTile(v: number) {
   bounce.value = { v, n: (bounce.value?.n ?? 0) + 1 }
   effect('tryAgain')
-  say([sayPhrase('thats'), sayNumber(v)])
+  say(sayThats(v))
   if (++wrong >= 2) {
     hint.value = true
     if (content.value === 2) countPassengersAloud(false)

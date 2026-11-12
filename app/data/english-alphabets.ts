@@ -1,6 +1,7 @@
 import type { AlphabetLetter, AlphabetPack, CardTheme, LetterAssets, SpokenPhrase } from '~/types/learning'
 import audioManifest from './audio-manifest.json' with { type: 'json' }
-import { numbersAudioCatalog } from './english-numbers'
+import { numbersAudioCatalog } from './english-numbers.ts'
+import { TRAIL_THEMES, type TrailTheme } from './trail-themes.ts'
 
 /**
  * English A–Z content for "My First ABC".
@@ -101,6 +102,9 @@ const phrase = (text: string, id: string): SpokenPhrase => ({
   audio: RECORDED.phrases.has(id) ? audioPaths.phrase(id) : null,
 })
 
+/** Letter Trails: what a friend says on arrival, e.g. "Bunny found the carrots!" */
+export const arrivalPhrase = (theme: TrailTheme): SpokenPhrase => phrase(theme.arrival, `arrival-${theme.id}`)
+
 export const englishAlphabetPack: AlphabetPack = {
   lang: 'en',
   letters: englishAlphabets,
@@ -139,24 +143,37 @@ export interface AudioClip {
   /** Path under /public. */
   path: string
   text: string | null
+  /** What the voice model reads instead of `text`, where it would misread it (see `ENGINE_LETTER`). */
+  engine?: string
 }
+
+/**
+ * How the voice model (`npm run audio`) should read a letter it would otherwise misread. Kokoro
+ * takes a lone "A" for the article "uh" ("Find big uh and little uh!"); "Eh" comes out as the
+ * letter name. Only the generated recording changes: the id, the text on screen and the device
+ * voice keep the real letter. Check with `npm run audio -- --phonemes`.
+ */
+const ENGINE_LETTER: Record<string, string> = { a: 'Eh' }
+const forEngine = (l: AlphabetLetter): AlphabetLetter => ({ ...l, spokenLetter: ENGINE_LETTER[l.id] ?? l.spokenLetter })
 
 /** Every clip this pack can play, recorded or not. Used by `scripts/generate-audio.mjs`. */
 export function audioCatalog(): AudioClip[] {
   const clips: AudioClip[] = englishAlphabets.flatMap(l => [
-    { kind: 'letters', id: l.id, path: audioPaths.letter(l.id), text: l.spokenLetter },
+    { kind: 'letters', id: l.id, path: audioPaths.letter(l.id), text: l.spokenLetter, engine: ENGINE_LETTER[l.id] },
     { kind: 'words', id: l.id, path: audioPaths.word(l.word), text: l.word },
     { kind: 'objects', id: l.id, path: audioPaths.object(l.word), text: null },
   ] satisfies AudioClip[])
   const seen = new Set<string>()
-  for (const entry of Object.values(englishAlphabetPack.phrases)) {
-    const phrases = typeof entry === 'function' ? englishAlphabets.map(entry) : Array.isArray(entry) ? entry : [entry]
-    for (const p of phrases) {
-      if (seen.has(p.id)) continue
-      seen.add(p.id)
-      clips.push({ kind: 'phrases', id: p.id, path: audioPaths.phrase(p.id), text: p.text })
-    }
+  const add = (p: SpokenPhrase, engine?: string) => {
+    if (seen.has(p.id)) return
+    seen.add(p.id)
+    clips.push({ kind: 'phrases', id: p.id, path: audioPaths.phrase(p.id), text: p.text, engine: engine !== p.text ? engine : undefined })
   }
+  for (const entry of Object.values(englishAlphabetPack.phrases)) {
+    if (typeof entry === 'function') englishAlphabets.forEach(l => add(entry(l), entry(forEngine(l)).text))
+    else (Array.isArray(entry) ? entry : [entry]).forEach(p => add(p))
+  }
+  for (const theme of TRAIL_THEMES) add(arrivalPhrase(theme))
   // Numbers & Counting shares the phrase folder (number-7.mp3, numbers-find.mp3, …).
   for (const p of numbersAudioCatalog()) clips.push({ kind: 'phrases', id: p.id, path: audioPaths.phrase(p.id), text: p.text })
   return clips

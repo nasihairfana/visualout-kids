@@ -298,6 +298,7 @@ app/
 scripts/postbuild.mjs          After each build: per-game link-preview tags, Cloudflare Pages headers
 scripts/make-og-images.mjs     Renders the link-preview images in public/og (run by hand after changes)
 scripts/generate-audio.mjs     `npm run audio`: voices every clip offline with Kokoro, writes the audio manifest
+scripts/check-audio.mjs        `npm run check:audio` (run by `generate`): fails if anything the app says has no recording
 public/
   illustrations/               26 placeholder SVGs (see ASSETS.md)
   audio/en/…                   Generated speech clips (see ASSETS.md)
@@ -323,13 +324,18 @@ The components never hard-code letters, words or phrases.
 ## Audio behaviour
 
 - Only one voice clip plays at a time. New speech always stops the previous clip.
+- Everything is said by one recorded voice. A line is a whole sentence, or at most two or three
+  short phrases that each carry their number ("Three," "and two." "That makes five!"), never single
+  words joined together. All the parts of a line start loading together, so they play without gaps.
+  `npm run generate` fails if any line has no recording (`npm run check:audio`).
 - The fallback order is: **local recording → on-device system voice (if a parent allows it) → silence.**
   The shipped clips are generated ahead of time (`npm run audio`), so the app never calls an online
   TTS API. For the device voice it only uses voices that report `localService`, skips novelty voices
   and prefers warm, high-quality ones (Samantha, Ava, Karen, "Enhanced"/"Natural" variants…).
   On Android, the system default is the on-device TTS engine.
 - The tap, success, try-again and celebrate sounds are synthesized with Web Audio, so they need no
-  files. The "try again" sound is a warm rising tone, never a buzzer.
+  files. The "try again" sound is a warm rising tone, never a buzzer. They play softer while
+  someone is speaking, so a chime never covers a word.
 - Sound only plays in response to a tap: a tap on a button, or the tap that started a round.
   Audio stops when the app goes to the background.
 - Background music is supported but **off by default**, and no track ships yet.
@@ -357,12 +363,11 @@ away from the game controls.
 
 ## Known gaps before release
 
-- **Offline install not yet verified on a real device.** The build precaches every file (234
-  entries, 2.5 MB, including all routes, illustrations and speech clips), but the dev sandbox couldn't run a service worker.
+- **Offline install not yet verified on a real device.** The build precaches every file (710
+  entries, 7.1 MB, including all routes, illustrations and the 592 speech clips), but the dev sandbox couldn't run a service worker.
   Check this on an Android phone: install → airplane mode → relaunch.
 - Speech is generated, not yet human-recorded, and all illustrations (including the Letter Trails
-  friends and the Numbers & Counting art) are placeholders. Numbers & Counting is not voiced yet:
-  it uses the device voice until `npm run audio` is run. See [ASSETS.md](ASSETS.md).
+  friends and the Numbers & Counting art) are placeholders. See [ASSETS.md](ASSETS.md).
 - Usability testing with parents and children aged 2–3 is still to do.
 
 ## Support the project

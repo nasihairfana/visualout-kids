@@ -165,11 +165,14 @@ function run(start: number, length: number, by: number) {
   return Array.from({ length }, (_, k) => start + k * by)
 }
 
+/** The highest number with a voice (`MAX_NUMBER` in `english-numbers.ts`). A card never shows more. */
+const TOP_NUMBER = 30
+
 export function sequenceRound(d: Difficulty, step: number, i: number, rand: Random = Math.random, allowMissing = true): SequenceRound {
   const extrasFor = (values: number[], count: number, lo: number, hi: number) => {
     const out = new Set<number>()
     for (let tries = 0; out.size < count && tries < 60; tries++) {
-      const n = int(rand, lo, hi)
+      const n = int(rand, lo, Math.min(hi, TOP_NUMBER))
       if (!values.includes(n)) out.add(n)
     }
     return [...out]

@@ -2,7 +2,7 @@
 import type { Difficulty } from '~/games/numbers/rounds'
 import { sequenceRound, shuffle } from '~/games/numbers/rounds'
 import type { NumberGame } from '~/data/number-games'
-import { sayNumber, sayPhrase } from '~/data/english-numbers'
+import { sayAsk, sayNumber, sayPhrase, sayThats } from '~/data/english-numbers'
 
 /**
  * Numbers in order (Number Jumping): tap the lily pads in order and the frog hops across the pond.
@@ -34,7 +34,7 @@ const next = computed(() => filled.value.indexOf(false))
 function instruction() {
   const lead = round.kind === 'down' ? 'countBack' : round.kind === 'twos' ? 'countByTwos' : round.kind === 'missing' ? 'whichIsMissing' : props.game.ask
   const start = values.filter((_, k) => round.given[k])
-  return [sayPhrase(lead), ...start.map(sayNumber)]
+  return [...sayAsk(lead), ...start.map(sayNumber)]
 }
 const instruct = () => say(instruction())
 onMounted(() => setTimeout(instruct, 350))
@@ -48,7 +48,7 @@ function place(value: number) {
   if (values[k] !== value) {
     wobble.value = { value, n: (wobble.value?.n ?? 0) + 1 }
     effect('tryAgain')
-    say([sayPhrase('thats'), sayNumber(value)])
+    say(sayThats(value))
     if (++wrong >= 2) hint.value = true
     return
   }

@@ -2,7 +2,7 @@
 import type { CollectRound, Difficulty } from '~/games/numbers/rounds'
 import { collectRound } from '~/games/numbers/rounds'
 import type { NumberGame } from '~/data/number-games'
-import { sayNumber, sayPhrase } from '~/data/english-numbers'
+import { sayAddMore, sayAsk, sayDifference, sayNumber, sayPhrase, saySum, sayTakeAway } from '~/data/english-numbers'
 
 /**
  * Collect and count: move things into the basket (or the fish, or onto the cake), one at a time.
@@ -59,9 +59,9 @@ function badge(i: number) {
 // ---- what to say ---------------------------------------------------------------------------------
 
 function instruction() {
-  if (round.kind === 'collect') return [sayPhrase(props.game.ask), sayNumber(round.target)]
-  if (round.kind === 'add') return [sayNumber(round.start), sayPhrase('addMore'), sayNumber(round.add), sayPhrase('more')]
-  return [sayNumber(round.start), sayPhrase('takeAway'), sayNumber(round.remove)]
+  if (round.kind === 'collect') return sayAsk(props.game.ask, round.target)
+  if (round.kind === 'add') return sayAddMore(round.start, round.add)
+  return sayTakeAway(round.start, round.remove)
 }
 const instruct = () => say(instruction())
 onMounted(() => setTimeout(instruct, 350))
@@ -98,8 +98,8 @@ async function finish() {
   const sentence = round.kind === 'collect'
     ? [sayPhrase(props.game.cheer)]
     : round.kind === 'add'
-      ? [sayNumber(round.start), sayPhrase('and'), sayNumber(round.add), sayPhrase('makes'), sayNumber(total)]
-      : [sayNumber(round.start), sayPhrase('takeAway'), sayNumber(round.remove), sayPhrase('takeAwayLeaves'), sayNumber(total)]
+      ? saySum(round.start, round.add)
+      : sayDifference(round.start, round.remove)
   emit('solved')
   await then(sentence)
 }
