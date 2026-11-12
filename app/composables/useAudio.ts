@@ -1,4 +1,4 @@
-import { readonly, ref, watch } from 'vue'
+import { effectScope, readonly, ref, watch } from 'vue'
 import type { SpokenClip } from '~/types/learning'
 
 /**
@@ -27,7 +27,11 @@ const speaking = ref(false)
 const unavailable = new Set<string>()
 let token = 0
 let currentEl: HTMLAudioElement | null = null
+/** The rest of the clips `say()` is about to play, loading ahead so each starts without a gap. */
+let queued: HTMLAudioElement[] = []
 let audioCtx: AudioContext | null = null
+/** All effects go through this, so they can be turned down while someone is speaking. */
+let effectsBus: GainNode | null = null
 let effectNodes: AudioScheduledSourceNode[] = []
 let musicEl: HTMLAudioElement | null = null
 let cachedVoice: SpeechSynthesisVoice | null | undefined
@@ -82,14 +86,35 @@ function stopCurrent() {
     currentEl.src = ''
     currentEl = null
   }
+  for (const el of queued) {
+    if (el.src) {
+      el.removeAttribute('src')
+      el.load() // stops the download
+    }
+  }
+  queued = []
   if (hasSpeech()) window.speechSynthesis.cancel()
   speaking.value = false
 }
 
-function playFile(src: string, volume: number, myToken: number): Promise<boolean> {
-  if (unavailable.has(src)) return Promise.resolve(false)
+/** Start loading a clip now, so it is ready when its turn comes. */
+function preload(src: string): HTMLAudioElement {
+  const el = new Audio()
+  el.preload = 'auto'
+  el.src = src
+  return el
+}
+
+/** A missing or undecodable file won't get better, so it isn't asked for again this session. A network error might be brief. */
+const isBroken = (el: HTMLAudioElement) => el.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || el.error?.code === MediaError.MEDIA_ERR_DECODE
+
+function playFile(el: HTMLAudioElement, src: string, volume: number, myToken: number): Promise<boolean> {
+  // It may have failed while loading ahead, before anything was listening.
+  if (el.error) {
+    if (isBroken(el)) unavailable.add(src)
+    return Promise.resolve(false)
+  }
   return new Promise((resolve) => {
-    const el = new Audio(src)
     el.volume = volume
     currentEl = el
     let settled = false
@@ -105,13 +130,18 @@ function playFile(src: string, volume: number, myToken: number): Promise<boolean
     // by a load/decode failure is left to the `error` handler, so the device voice can step in.
     el.addEventListener('pause', () => { if (myToken !== token || !el.error) done(true) })
     el.addEventListener('error', () => {
-      // Missing or undecodable — don't keep retrying. (Ignore errors caused by our own stop.)
-      if (myToken === token) unavailable.add(src)
-      done(myToken !== token)
+      if (myToken !== token) return done(true) // caused by our own stop
+      if (isBroken(el)) unavailable.add(src)
+      done(false)
     })
     el.play().catch((err: unknown) => {
-      // NotAllowedError = no user gesture yet. Not the file's fault, so don't blacklist it.
-      if (!(err instanceof DOMException && err.name === 'NotAllowedError')) unavailable.add(src)
+      // Newer speech (a quick second tap) stopped this clip before it started. That rejects play()
+      // with AbortError, and is not the file's fault: blacklisting it here used to hand the clip to
+      // the device voice for the rest of the session.
+      if (myToken !== token) return done(true)
+      // NotAllowedError = no user gesture yet; AbortError = interrupted. Neither is the file's fault.
+      const harmless = err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'AbortError')
+      if (!harmless) unavailable.add(src)
       done(false)
     })
   })
@@ -187,10 +217,20 @@ function playWhoosh(ctx: AudioContext, volume: number) {
   gain.gain.setValueAtTime(0.0001, t0)
   gain.gain.exponentialRampToValueAtTime(0.35 * volume, t0 + 0.06)
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration)
-  noise.connect(filter).connect(gain).connect(ctx.destination)
+  noise.connect(filter).connect(gain).connect(effectsBus ?? ctx.destination)
   noise.start(t0)
   noise.stop(t0 + duration + 0.02)
   return noise
+}
+
+/** How loud effects are while someone is speaking, so a chime never covers the first word. */
+const DUCKED = 0.45
+
+function duckEffects(on: boolean) {
+  if (!audioCtx || !effectsBus) return
+  const t = audioCtx.currentTime
+  effectsBus.gain.cancelScheduledValues(t)
+  effectsBus.gain.setTargetAtTime(on ? DUCKED : 1, t, 0.04)
 }
 
 function playEffect(name: EffectName, volume: number) {
@@ -198,7 +238,12 @@ function playEffect(name: EffectName, volume: number) {
   const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!Ctx) return
   try {
-    audioCtx ??= new Ctx()
+    if (!audioCtx) {
+      audioCtx = new Ctx()
+      effectsBus = audioCtx.createGain()
+      effectsBus.gain.value = speaking.value ? DUCKED : 1
+      effectsBus.connect(audioCtx.destination)
+    }
     if (audioCtx.state === 'suspended') void audioCtx.resume()
     effectNodes.forEach((n) => { try { n.stop() } catch { /* already stopped */ } })
     effectNodes = []
@@ -216,7 +261,7 @@ function playEffect(name: EffectName, volume: number) {
       gain.gain.setValueAtTime(0.0001, t0 + start)
       gain.gain.exponentialRampToValueAtTime(peak, t0 + start + 0.015)
       gain.gain.exponentialRampToValueAtTime(0.0001, t0 + start + dur)
-      osc.connect(gain).connect(audioCtx.destination)
+      osc.connect(gain).connect(effectsBus ?? audioCtx.destination)
       osc.start(t0 + start)
       osc.stop(t0 + start + dur + 0.02)
       effectNodes.push(osc)
@@ -232,7 +277,12 @@ export function useAudio(lang = 'en') {
 
   if (import.meta.client && !initialised) {
     initialised = true
-    if (hasSpeech()) window.speechSynthesis.onvoiceschanged = () => { cachedVoice = undefined }
+    if (hasSpeech()) {
+      window.speechSynthesis.onvoiceschanged = () => { cachedVoice = undefined }
+      // Some browsers only start loading their voices when first asked. Ask now, so a fallback
+      // uses the chosen voice from its first word instead of the system default.
+      window.speechSynthesis.getVoices()
+    }
     // iOS/iPadOS: let speech and effects play even when the ring/silent switch is on.
     const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession
     if (session) {
@@ -243,10 +293,15 @@ export function useAudio(lang = 'en') {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) { stopCurrent(); musicEl?.pause() }
     })
-    watch(() => settings.value.soundOn, (on) => { if (!on) { stopCurrent(); musicEl?.pause() } })
-    watch(() => settings.value.volume, (v) => {
-      if (currentEl) currentEl.volume = v
-      if (musicEl) musicEl.volume = v * 0.25
+    // A detached scope: these must outlive the component that happened to call useAudio() first
+    // (watchers made in its setup would stop when it unmounts, e.g. on leaving the home page).
+    effectScope(true).run(() => {
+      watch(speaking, duckEffects)
+      watch(() => settings.value.soundOn, (on) => { if (!on) { stopCurrent(); musicEl?.pause() } })
+      watch(() => settings.value.volume, (v) => {
+        if (currentEl) currentEl.volume = v
+        if (musicEl) musicEl.volume = v * 0.25
+      })
     })
   }
 
@@ -256,15 +311,24 @@ export function useAudio(lang = 'en') {
     if (!import.meta.client || !settings.value.soundOn) return
     const myToken = token
     speaking.value = true
-    for (const clip of Array.isArray(clips) ? clips : [clips]) {
+    const list = Array.isArray(clips) ? clips : [clips]
+    // Load every part up front, so the next one is ready the moment the last ends: a line made of
+    // two or three recordings then sounds like one sentence, not separate words.
+    const els = list.map(clip => (clip.src && !unavailable.has(clip.src) ? preload(clip.src) : null))
+    queued = els.filter(el => el !== null)
+    for (const [i, clip] of list.entries()) {
       if (myToken !== token) return
       const volume = settings.value.volume
-      const played = clip.src ? await playFile(clip.src, volume, myToken) : false
+      const el = els[i]
+      const played = el && clip.src ? await playFile(el, clip.src, volume, myToken) : false
       if (!played && clip.text && settings.value.deviceVoiceFallback && myToken === token) {
         await speakText(clip.text, lang, volume, myToken)
       }
     }
-    if (myToken === token) speaking.value = false
+    if (myToken === token) {
+      queued = []
+      speaking.value = false
+    }
   }
 
   function effect(name: EffectName) {

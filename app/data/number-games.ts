@@ -1,4 +1,4 @@
-import type { NumbersPhrase } from './english-numbers'
+import type { GameAsk, NumbersPhrase } from './english-numbers'
 
 /**
  * Numbers & Counting: the eleven little adventures. Each one is a themed setting of one of four
@@ -43,8 +43,8 @@ export interface NumberGame {
   hero: NumberArtKind
   /** Things to count, one per round in turn, so each round looks a bit different. */
   items: NumberArtKind[]
-  /** The spoken instruction that goes before the number: "Collect" … "five!". */
-  ask: NumbersPhrase
+  /** The spoken instruction: with the round's number for collect and find games ("Collect five!"), on its own for the rest. */
+  ask: GameAsk
   /** Said when a round is solved. */
   cheer: NumbersPhrase
   /** All Numbers stars together needed to open it. */

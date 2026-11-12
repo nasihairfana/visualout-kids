@@ -4,6 +4,7 @@ import type { Cell, Difficulty } from '~/games/trail/levels'
 import { buildLevel } from '~/games/trail/levels'
 import type { TrailTheme } from '~/data/trail-themes'
 import { themeById } from '~/data/trail-themes'
+import { arrivalPhrase } from '~/data/english-alphabets'
 
 /**
  * Letter Trails: see the letter, follow it across the map, get the animal to its goal.
@@ -92,7 +93,7 @@ function finish() {
   done.value = true
   clearTimeout(idleTimer)
   effect('celebrate')
-  say([clips.phrase(pack.phrases.foundTheWay), { src: null, text: theme.value.arrival }])
+  say([clips.phrase(pack.phrases.foundTheWay), clips.phrase(arrivalPhrase(theme.value))])
   unlocked.value = progress.complete(props.difficulty, levelNumber.value)
   successTimer = setTimeout(() => { showSuccess.value = true }, 1500)
 }

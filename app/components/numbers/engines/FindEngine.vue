@@ -2,7 +2,7 @@
 import type { Difficulty } from '~/games/numbers/rounds'
 import { findRound } from '~/games/numbers/rounds'
 import type { NumberArtKind, NumberGame } from '~/data/number-games'
-import { sayNumber, sayPhrase } from '~/data/english-numbers'
+import { sayAddQuestion, sayAsk, sayNumber, sayPhrase, sayTakeAwayQuestion, sayThats } from '~/data/english-numbers'
 
 /**
  * Find the number: pop the balloon, catch the fish or fly to the planet with the right number.
@@ -35,12 +35,12 @@ let wrong = 0
 
 function instruction() {
   switch (p.kind) {
-    case 'find': return [sayPhrase(props.game.ask), sayNumber(p.n)]
+    case 'find': return sayAsk(props.game.ask, p.n)
     case 'howMany': return [sayPhrase('howMany')]
     case 'more': return [sayPhrase('whichMore')]
     case 'less': return [sayPhrase('whichLess')]
-    case 'add': return [sayNumber(p.a), sayPhrase('and'), sayNumber(p.b), sayPhrase('howMany')]
-    case 'sub': return [sayNumber(p.a), sayPhrase('takeAway'), sayNumber(p.b), sayPhrase('howMany')]
+    case 'add': return sayAddQuestion(p.a, p.b)
+    case 'sub': return sayTakeAwayQuestion(p.a, p.b)
     case 'missing': return [sayPhrase('whichIsMissing')]
   }
 }
@@ -57,7 +57,7 @@ async function choose(value: number, el: HTMLElement) {
   if (value !== round.answer) {
     wobble.value = { value, n: (wobble.value?.n ?? 0) + 1 }
     effect('tryAgain')
-    say(compare ? [sayPhrase(p.kind === 'more' ? 'thatsLess' : 'thatsMore')] : [sayPhrase('thats'), sayNumber(value)])
+    say(compare ? [sayPhrase(p.kind === 'more' ? 'thatsLess' : 'thatsMore')] : sayThats(value))
     if (++wrong >= 2) hint.value = true
     return
   }

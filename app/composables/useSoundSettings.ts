@@ -1,4 +1,4 @@
-import { watch } from 'vue'
+import { effectScope, watch } from 'vue'
 
 export interface SoundSettings {
   /** Master switch, also exposed to the child as the speaker toggle. */
@@ -48,12 +48,16 @@ export function useSoundSettings() {
 
   if (import.meta.client && !persisting) {
     persisting = true
-    watch(settings, (value) => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
-      }
-      catch { /* storage unavailable (private mode) — settings just won't persist */ }
-    }, { deep: true })
+    // Detached, so saving keeps working after the component that first asked for the settings
+    // unmounts (a watcher made in its setup would stop with it).
+    effectScope(true).run(() => {
+      watch(settings, (value) => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+        }
+        catch { /* storage unavailable (private mode) — settings just won't persist */ }
+      }, { deep: true })
+    })
   }
 
   const toggleSound = () => {
